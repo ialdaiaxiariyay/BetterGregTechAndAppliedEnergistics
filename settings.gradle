@@ -1,0 +1,12 @@
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+}
+
+dependencyResolutionManagement {
+    versionCatalogs {
+        libs {
+            version("jetbrains-annotations", "26.0.1")
+            library("jetbrains-annotations", "org.jetbrains", "annotations").versionRef("jetbrains-annotations")
+        }
+    }
+}

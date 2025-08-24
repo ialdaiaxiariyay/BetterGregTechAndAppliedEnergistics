@@ -1,0 +1,16 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "top.ialdaiaxiariyay.bettergtae.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "bettergtae.refmap.json",
+  "plugin": "top.ialdaiaxiariyay.bettergtae.mixin.MixinConfig",
+  "mixins": [
+    "ae.PatternProviderLogicMixin"
+  ],
+  "client": [
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

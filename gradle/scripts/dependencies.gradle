@@ -1,0 +1,42 @@
+dependencies {
+    compileOnly libs.jetbrains.annotations
+    modCompileOnly("mezz.jei:jei-$project.minecraft_version-forge-api:$project.jei_version") { transitive = false }
+    modCompileOnly("mezz.jei:jei-$project.minecraft_version-common-api:$project.jei_version") { transitive = false }
+    modRuntimeOnly("mezz.jei:jei-$project.minecraft_version-forge:$project.jei_version") { transitive = false }
+
+    modImplementation("com.gregtechceu.gtceu:gtceu-$project.minecraft_version:$project.gtceu_version") { transitive = false }
+
+    modImplementation("maven.modrinth:ldlib:mc$project.minecraft_version-$project.ldlib_version") { transitive = false }
+
+    modImplementation("com.tterrag.registrate:Registrate:$project.registrate_version")
+
+    modImplementation("maven.modrinth:kubejs:$project.kubejs_version")
+    modImplementation("maven.modrinth:rhino:2001.2.3-build.6+forge")
+    modImplementation("maven.modrinth:jade:$project.jade_version")
+    // Mixin Extras
+    api(annotationProcessor("io.github.llamalad7:mixinextras-common:$project.mixinextras_version"))
+    annotationProcessor 'org.spongepowered:mixin:0.8.7:processor'
+
+    compileOnly(annotationProcessor("com.github.bawnorton.mixinsquared:mixinsquared-common:0.3.3"))
+    implementation(jarJar("com.github.bawnorton.mixinsquared:mixinsquared-forge:0.3.3"))
+
+    modImplementation("maven.modrinth:guideme:20.1.11")
+    modImplementation("maven.modrinth:ae2:15.4.2")
+    modImplementation("dev.architectury:architectury-forge:${project.architectury_version}")
+
+    modImplementation("dev.toma.configuration:configuration-forge-$project.minecraft_version:$project.configuration_version")
+
+
+    // ftb-chunk
+    modImplementation("curse.maven:ftb-chunks-forge-314906:5378090"){ transitive = false }
+    modRuntimeOnly("curse.maven:ftb-library-forge-404465:5567591"){ transitive = false }
+    modRuntimeOnly("curse.maven:ftb-teams-forge-404468:5267190"){ transitive = false }
+    modImplementation("curse.maven:ftb-ultimine-forge-386134:5363345"){ transitive = false }
+
+    modRuntimeOnly("maven.modrinth:embeddium:0.3.30+mc1.20.1")
+    
+    modRuntimeOnly("maven.modrinth:justenoughcharacters:lNBZNQmX")//4.5.16
+
+    modRuntimeOnly("maven.modrinth:spark:1.10.53-forge")
+
+}
