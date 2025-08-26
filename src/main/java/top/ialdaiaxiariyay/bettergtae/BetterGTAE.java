@@ -1,5 +1,7 @@
 package top.ialdaiaxiariyay.bettergtae;
 
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import top.ialdaiaxiariyay.bettergtae.api.registrate.BGTAERegistrate;
 import top.ialdaiaxiariyay.bettergtae.common.data.BGTAECreativeModeTabs;
 import top.ialdaiaxiariyay.bettergtae.common.data.machine.BGTAEMachines;
@@ -31,8 +33,15 @@ public class BetterGTAE {
     public BetterGTAE(FMLJavaModLoadingContext context) {
         IEventBus modEventBus = context.getModEventBus();
         BGTAERegistrate.REGISTRATE.registerEventListeners(modEventBus);
+        modEventBus.addListener(this::onCommonSetup);
         modEventBus.addGenericListener(MachineDefinition.class, this::registerMachines);
         BGTAECreativeModeTabs.init();
+    }
+
+    private void onCommonSetup(FMLCommonSetupEvent event) {
+        if (ModList.get().isLoaded("gtocore") && ModList.get().isLoaded("gtolib")) {
+            throw new RuntimeException("Unreachable operation and not compatible with mod GTOCORE, GTOLIB");
+        }
     }
 
     private void registerMachines(GTCEuAPI.RegisterEvent<ResourceLocation, MachineDefinition> event) {

@@ -10,6 +10,7 @@ import com.gregtechceu.gtceu.api.machine.MachineDefinition;
 import com.gregtechceu.gtceu.api.machine.multiblock.PartAbility;
 
 import net.minecraft.network.chat.Component;
+import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.MEDualHatchPartMachine;
 
 import static com.gregtechceu.gtceu.api.GTValues.LuV;
 import static top.ialdaiaxiariyay.bettergtae.api.registrate.BGTAERegistrate.REGISTRATE;
@@ -51,5 +52,21 @@ public class BGTAEMachines {
                     Component.translatable("block.gtceu.pattern_buffer_proxy.desc.1"),
                     Component.translatable("block.gtceu.pattern_buffer_proxy.desc.2"),
                     Component.translatable("gtceu.part_sharing.enabled"))
+            .register();
+
+    public static final MachineDefinition ME_STOCKING_DUAL_INPUT_HATCH = REGISTRATE
+            .machine("me_stocking_dual_input_hatch", MEDualHatchPartMachine::new)
+            .tier(LuV)
+            .rotationState(RotationState.ALL)
+            .abilities(PartAbility.IMPORT_ITEMS, PartAbility.IMPORT_FLUIDS)
+            .rotationState(RotationState.ALL)
+            .tooltips(
+                    Component.translatable("bettergtae.machine.me_stocking_dual_input_hatch.tooltip.0"),
+                    Component.translatable("bettergtae.machine.me_stocking_dual_input_hatch.tooltip.1"),
+                    Component.translatable("bettergtae.machine.me_stocking_dual_input_hatch.tooltip.2"),
+                    Component.translatable("gtceu.machine.me.copy_paste.tooltip"),
+                    Component.translatable("bettergtae.machine.me_stocking_dual_input_hatch.tooltip.3"),
+                    Component.translatable("gtceu.part_sharing.enabled"))
+            .colorOverlayTieredHullModel(GTCEu.id("block/overlay/appeng/me_input_bus"))
             .register();
 }

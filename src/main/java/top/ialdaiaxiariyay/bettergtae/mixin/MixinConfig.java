@@ -1,7 +1,5 @@
 package top.ialdaiaxiariyay.bettergtae.mixin;
 
-import net.minecraftforge.fml.ModList;
-
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -13,8 +11,6 @@ public class MixinConfig implements IMixinConfigPlugin {
 
     @Override
     public void onLoad(String mixinPackage) {
-        if (ModList.get().isLoaded("gtocore") && ModList.get().isLoaded("gtolib"))
-            throw new Error("Unreachable operation and not compatible with mod GTOCORE, GTOLIB");
     }
 
     @Override

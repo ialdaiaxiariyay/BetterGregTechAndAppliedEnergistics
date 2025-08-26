@@ -22,6 +22,7 @@ import static com.gregtechceu.gtceu.api.GTValues.*;
 public class AssemblyLineRecipes {
 
     public static void init(Consumer<FinishedRecipe> provider) {
+
         GTRecipeTypes.ASSEMBLY_LINE_RECIPES.recipeBuilder(BetterGTAE.id("extend_me_pattern_buffer"))
                 .inputItems(GTAEMachines.ME_PATTERN_BUFFER)
                 .inputItems(GTItems.EMITTER_UV, 8)
@@ -58,7 +59,7 @@ public class AssemblyLineRecipes {
                 .inputItems(TagPrefix.wireFine, GTMaterials.Europium, 64)
                 .inputFluids(GTMaterials.SolderingAlloy, 1225)
                 .inputFluids(GTMaterials.Lubricant, 1000)
-                .outputItems(BGTAEMachines.EXTEND_ME_PATTERN_BUFFER)
+                .outputItems(BGTAEMachines.EXTEND_ME_PATTERN_BUFFER_PROXY)
                 .stationResearch(b -> b
                         .researchStack(GTAEMachines.ME_PATTERN_BUFFER_PROXY.asStack())
                         .dataStack(GTItems.TOOL_DATA_MODULE.asStack())
@@ -66,6 +67,20 @@ public class AssemblyLineRecipes {
                         .EUt(V[UV]))
                 .duration(20 * 30)
                 .EUt(V[UV], 16)
+                .save(provider);
+
+        GTRecipeTypes.ASSEMBLY_LINE_RECIPES.recipeBuilder(BetterGTAE.id("me_stocking_dual_input_hatch"))
+                .inputItems(GTAEMachines.STOCKING_IMPORT_BUS_ME)
+                .inputItems(GTAEMachines.STOCKING_IMPORT_HATCH_ME)
+                .inputItems(AEBlocks.INTERFACE.asItem(),2)
+                .inputItems(GTItems.CONVEYOR_MODULE_LuV)
+                .inputItems(GTItems.ELECTRIC_PUMP_LuV)
+                .inputItems(GTItems.SENSOR_UV, 2)
+                .inputItems(AEItems.SPEED_CARD.asItem(), 4)
+                .inputFluids(GTMaterials.SolderingAlloy, 1225)
+                .outputItems(BGTAEMachines.ME_STOCKING_DUAL_INPUT_HATCH)
+                .duration(20 * 30)
+                .EUt(V[LuV], 16)
                 .save(provider);
     }
 }

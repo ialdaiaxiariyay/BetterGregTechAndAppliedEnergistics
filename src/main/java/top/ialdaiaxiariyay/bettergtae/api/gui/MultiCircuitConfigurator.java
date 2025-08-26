@@ -202,6 +202,7 @@ public class MultiCircuitConfigurator implements IFancyConfigurator, IFancyCusto
         return group;
     }
 
+
     private void handleLeftClick(ItemStackHandler circuitInventory, int slotIndex, boolean isRemote) {
         ItemStack currentStack = circuitInventory.getStackInSlot(0);
         int newValue;
@@ -240,7 +241,6 @@ public class MultiCircuitConfigurator implements IFancyConfigurator, IFancyCusto
     }
 
     private void handleRightClick(ItemStackHandler circuitInventory, int slotIndex, boolean isRemote) {
-        ItemStack currentStack = circuitInventory.getStackInSlot(0);
         int newValue;
         if (ConfigHolder.INSTANCE.machines.ghostCircuit) {
             // 如果允许幽灵电路，则清空槽位
