@@ -22,7 +22,6 @@ import static com.gregtechceu.gtceu.api.GTValues.*;
 public class AssemblyLineRecipes {
 
     public static void init(Consumer<FinishedRecipe> provider) {
-
         GTRecipeTypes.ASSEMBLY_LINE_RECIPES.recipeBuilder(BetterGTAE.id("extend_me_pattern_buffer"))
                 .inputItems(GTAEMachines.ME_PATTERN_BUFFER)
                 .inputItems(GTItems.EMITTER_UV, 8)
@@ -72,7 +71,7 @@ public class AssemblyLineRecipes {
         GTRecipeTypes.ASSEMBLY_LINE_RECIPES.recipeBuilder(BetterGTAE.id("me_stocking_dual_input_hatch"))
                 .inputItems(GTAEMachines.STOCKING_IMPORT_BUS_ME)
                 .inputItems(GTAEMachines.STOCKING_IMPORT_HATCH_ME)
-                .inputItems(AEBlocks.INTERFACE.asItem(),2)
+                .inputItems(AEBlocks.INTERFACE.asItem(), 2)
                 .inputItems(GTItems.CONVEYOR_MODULE_LuV)
                 .inputItems(GTItems.ELECTRIC_PUMP_LuV)
                 .inputItems(GTItems.SENSOR_UV, 2)

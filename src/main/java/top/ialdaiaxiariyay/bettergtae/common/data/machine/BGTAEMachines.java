@@ -3,6 +3,7 @@ package top.ialdaiaxiariyay.bettergtae.common.data.machine;
 import top.ialdaiaxiariyay.bettergtae.common.data.BGTAECreativeModeTabs;
 import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferPartMachine;
 import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferProxyPartMachine;
+import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.MEDualHatchPartMachine;
 
 import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.data.RotationState;
@@ -10,7 +11,6 @@ import com.gregtechceu.gtceu.api.machine.MachineDefinition;
 import com.gregtechceu.gtceu.api.machine.multiblock.PartAbility;
 
 import net.minecraft.network.chat.Component;
-import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.MEDualHatchPartMachine;
 
 import static com.gregtechceu.gtceu.api.GTValues.LuV;
 import static top.ialdaiaxiariyay.bettergtae.api.registrate.BGTAERegistrate.REGISTRATE;

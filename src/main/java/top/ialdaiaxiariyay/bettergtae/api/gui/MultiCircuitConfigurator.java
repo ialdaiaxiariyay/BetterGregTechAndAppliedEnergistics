@@ -202,7 +202,6 @@ public class MultiCircuitConfigurator implements IFancyConfigurator, IFancyCusto
         return group;
     }
 
-
     private void handleLeftClick(ItemStackHandler circuitInventory, int slotIndex, boolean isRemote) {
         ItemStack currentStack = circuitInventory.getStackInSlot(0);
         int newValue;
