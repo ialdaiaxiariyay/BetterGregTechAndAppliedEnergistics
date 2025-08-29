@@ -1,15 +1,17 @@
 package top.ialdaiaxiariyay.bettergtae.common.data;
 
+import top.ialdaiaxiariyay.bettergtae.common.block.BGTAECraftingUnitBlock;
+import top.ialdaiaxiariyay.bettergtae.common.block.BGTAECraftingUnitType;
+
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.BlockItem;
+import net.minecraftforge.client.model.generators.ConfiguredModel;
+
 import appeng.block.crafting.AbstractCraftingUnitBlock;
 import appeng.blockentity.AEBaseBlockEntity;
 import appeng.blockentity.crafting.CraftingBlockEntity;
 import com.tterrag.registrate.util.entry.BlockEntityEntry;
 import com.tterrag.registrate.util.entry.BlockEntry;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.BlockItem;
-import net.minecraftforge.client.model.generators.ConfiguredModel;
-import top.ialdaiaxiariyay.bettergtae.common.block.BGTAECraftingUnitBlock;
-import top.ialdaiaxiariyay.bettergtae.common.block.BGTAECraftingUnitType;
 
 import static top.ialdaiaxiariyay.bettergtae.api.registrate.BGTAERegistrate.REGISTRATE;
 

@@ -1,18 +1,21 @@
 package top.ialdaiaxiariyay.bettergtae.data.recipe;
 
-import appeng.core.definitions.AEItems;
+import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
+
 import com.gregtechceu.gtceu.api.GTValues;
 import com.gregtechceu.gtceu.common.data.GTRecipeTypes;
+
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
-import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
+
+import appeng.core.definitions.AEItems;
 
 import java.util.function.Consumer;
 
 public class FormingPressRecipes {
-    public static void init(Consumer<FinishedRecipe> provider){
 
+    public static void init(Consumer<FinishedRecipe> provider) {
         GTRecipeTypes.FORMING_PRESS_RECIPES.recipeBuilder(BetterGTAE.id("calculation_processor_press"))
                 .notConsumable(AEItems.CALCULATION_PROCESSOR_PRESS.asItem())
                 .inputItems(Blocks.IRON_BLOCK.asItem())

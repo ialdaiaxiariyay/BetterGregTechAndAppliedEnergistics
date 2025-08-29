@@ -3,8 +3,6 @@ package top.ialdaiaxiariyay.bettergtae.utils;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
-import com.google.common.math.LongMath;
-
 import java.math.BigInteger;
 import java.text.DecimalFormat;
 

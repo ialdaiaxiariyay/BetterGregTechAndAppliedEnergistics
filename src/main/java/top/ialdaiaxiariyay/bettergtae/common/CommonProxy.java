@@ -1,16 +1,18 @@
 package top.ialdaiaxiariyay.bettergtae.common;
 
+import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
+import top.ialdaiaxiariyay.bettergtae.api.registrate.BGTAERegistrate;
+import top.ialdaiaxiariyay.bettergtae.common.data.BGTAECreativeModeTabs;
+import top.ialdaiaxiariyay.bettergtae.common.data.machine.BGTAEMachines;
+
 import com.gregtechceu.gtceu.api.GTCEuAPI;
 import com.gregtechceu.gtceu.api.machine.MachineDefinition;
+
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
-import top.ialdaiaxiariyay.bettergtae.api.registrate.BGTAERegistrate;
-import top.ialdaiaxiariyay.bettergtae.common.data.BGTAECreativeModeTabs;
-import top.ialdaiaxiariyay.bettergtae.common.data.machine.BGTAEMachines;
 
 public class CommonProxy {
 

@@ -4,7 +4,6 @@ import top.ialdaiaxiariyay.bettergtae.api.registrate.BGTAERegistrate;
 import top.ialdaiaxiariyay.bettergtae.common.data.BGTAEBlocks;
 import top.ialdaiaxiariyay.bettergtae.common.data.BGTAEItems;
 import top.ialdaiaxiariyay.bettergtae.data.recipe.AddAllRecipes;
-import top.ialdaiaxiariyay.bettergtae.data.recipe.AssemblyLineRecipes;
 
 import com.gregtechceu.gtceu.api.addon.GTAddon;
 import com.gregtechceu.gtceu.api.addon.IGTAddon;

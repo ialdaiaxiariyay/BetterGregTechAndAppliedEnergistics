@@ -9,6 +9,7 @@ import com.gregtechceu.gtceu.api.pattern.FactoryBlockPattern;
 import com.gregtechceu.gtceu.api.pattern.Predicates;
 import com.gregtechceu.gtceu.common.data.GTRecipeTypes;
 import com.gregtechceu.gtceu.common.machine.multiblock.electric.AssemblyLineMachine;
+
 import net.minecraft.network.chat.Component;
 
 import static com.gregtechceu.gtceu.api.pattern.Predicates.blocks;
@@ -22,7 +23,7 @@ import static top.ialdaiaxiariyay.bettergtae.api.registrate.BGTAERegistrate.REGI
 
 public class BGTAEMultiblockA {
 
-    public static void init(){}
+    public static void init() {}
 
     public static final MultiblockMachineDefinition ADVANCED_ASSEMBLY_LINE = REGISTRATE
             .multiblock("advanced_assembly_line", WorkableElectricMultiblockMachine::new)

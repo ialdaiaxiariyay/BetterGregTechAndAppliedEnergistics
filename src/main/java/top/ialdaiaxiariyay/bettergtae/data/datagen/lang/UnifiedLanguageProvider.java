@@ -1,6 +1,5 @@
 package top.ialdaiaxiariyay.bettergtae.data.datagen.lang;
 
-import net.minecraft.world.item.Item;
 import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
 import top.ialdaiaxiariyay.bettergtae.data.datagen.lang.initlang.BlockLang;
 import top.ialdaiaxiariyay.bettergtae.data.datagen.lang.initlang.ItemLang;

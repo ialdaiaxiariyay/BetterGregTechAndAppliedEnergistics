@@ -1,14 +1,15 @@
 package top.ialdaiaxiariyay.bettergtae;
 
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.DistExecutor;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.fml.common.Mod;
 import top.ialdaiaxiariyay.bettergtae.client.ClientProxy;
 import top.ialdaiaxiariyay.bettergtae.common.CommonProxy;
+
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.common.Mod;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import static net.minecraft.resources.ResourceLocation.tryBuild;
 
@@ -23,7 +24,7 @@ public class BetterGTAE {
         return tryBuild(MOD_ID, name);
     }
 
-    public BetterGTAE(){
+    public BetterGTAE() {
         DistExecutor.unsafeRunForDist(() -> ClientProxy::new, () -> CommonProxy::new);
         MinecraftForge.EVENT_BUS.register(this);
     }

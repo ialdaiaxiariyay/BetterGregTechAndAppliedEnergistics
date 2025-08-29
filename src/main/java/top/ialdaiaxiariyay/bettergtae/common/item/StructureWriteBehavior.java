@@ -1,18 +1,12 @@
 package top.ialdaiaxiariyay.bettergtae.common.item;
 
+import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
+import top.ialdaiaxiariyay.bettergtae.utils.RegistriesUtil;
+
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
 import com.gregtechceu.gtceu.api.item.ComponentItem;
 import com.gregtechceu.gtceu.api.item.component.IItemUIFactory;
 import com.gregtechceu.gtceu.api.pattern.util.RelativeDirection;
-
-import com.lowdragmc.lowdraglib.gui.factory.HeldItemUIFactory;
-import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
-import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
-import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
-import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
-import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
-import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
-import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -28,8 +22,14 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 
 import com.google.common.base.Joiner;
-import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
-import top.ialdaiaxiariyay.bettergtae.utils.RegistriesUtil;
+import com.lowdragmc.lowdraglib.gui.factory.HeldItemUIFactory;
+import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
+import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
+import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
+import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
+import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
+import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
+import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -62,11 +62,11 @@ public class StructureWriteBehavior implements IItemUIFactory {
                             z = 1 + blockPos[1].getZ() - blockPos[0].getZ();
                         }
                     }
-                    return String.format("Structural scale: X:%d Y:%d Z:%d",x,y,z);
+                    return String.format("Structural scale: X:%d Y:%d Z:%d", x, y, z);
                 }).setTextColor(0xFAF9F6)).addWidget(new LabelWidget(7, 20, () -> {
                     var direction = getDir(playerInventoryHolder.getHeld());
                     var dirs = DebugBlockPattern.getDir(direction);
-                    return String.format("Export order: C:%s S:%s A:%s", dirs[0].name(),dirs[1].name(),dirs[2].name());
+                    return String.format("Export order: C:%s S:%s A:%s", dirs[0].name(), dirs[1].name(), dirs[2].name());
                 }).setTextColor(0xFAF9F6));
         container.setBackground(GuiTextures.BACKGROUND_INVERSE);
         return new ModularUI(176, 120, playerInventoryHolder, entityPlayer)
@@ -117,14 +117,14 @@ public class StructureWriteBehavior implements IItemUIFactory {
                         blockPos[1].getX(),
                         blockPos[1].getY(),
                         blockPos[1].getZ());
-            RelativeDirection[] dirs = DebugBlockPattern.getDir(direction);
-            blockPattern.changeDir(dirs[0], dirs[1], dirs[2]);
-            builder.append(".pattern(definition -> FactoryBlockPattern.start()\n");
+                RelativeDirection[] dirs = DebugBlockPattern.getDir(direction);
+                blockPattern.changeDir(dirs[0], dirs[1], dirs[2]);
+                builder.append(".pattern(definition -> FactoryBlockPattern.start()\n");
                 for (int i = 0; i < blockPattern.pattern.length; i++) {
                     String[] strings = blockPattern.pattern[i];
                     builder.append(".aisle(\"%s\")\n".formatted(Joiner.on("\", \"").join(strings)));
                 }
-            builder.append(".where(\"~\", Predicates.controller(Predicates.blocks(definition.get())))\n");
+                builder.append(".where(\"~\", Predicates.controller(Predicates.blocks(definition.get())))\n");
                 blockPattern.legend.forEach((b, c) -> {
                     if (c.equals(' ')) return;
                     builder.append(".where(\"").append(c).append("\", Predicates.blocks(RegistriesUtil.getBlock(\"")
