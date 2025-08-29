@@ -1,7 +1,9 @@
 package top.ialdaiaxiariyay.bettergtae.data.datagen.lang;
 
+import net.minecraft.world.item.Item;
 import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
 import top.ialdaiaxiariyay.bettergtae.data.datagen.lang.initlang.BlockLang;
+import top.ialdaiaxiariyay.bettergtae.data.datagen.lang.initlang.ItemLang;
 import top.ialdaiaxiariyay.bettergtae.data.datagen.lang.initlang.Lang;
 import top.ialdaiaxiariyay.bettergtae.data.datagen.lang.initlang.TipsLang;
 
@@ -35,6 +37,7 @@ public class UnifiedLanguageProvider extends LanguageProvider {
 
     private void initializeTranslations() {
         BlockLang.init(this);
+        ItemLang.init(this);
         TipsLang.init(this);
         Lang.init(this);
     }

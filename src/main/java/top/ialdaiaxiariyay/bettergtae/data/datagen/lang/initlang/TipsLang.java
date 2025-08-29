@@ -13,5 +13,8 @@ public class TipsLang {
         provider.add("bettergtae.machine.me_stocking_dual_input_hatch.tooltip.2", "Keeps 16 item and fluid types in stock", "可标记16种物品和流体");
         provider.add("bettergtae.machine.me_stocking_dual_input_hatch.tooltip.3", "Auto-Pull from ME mode will automatically stock the first 16 items and fluids in the ME system, updated every 5 seconds.", "ME自动拉取模式将自动标记ME网络中的前16种物品和流体，每5秒更新一次。");
         provider.add("bettergtae.machine.me.dual_stocking.data_stick.name", "Me Stocking Dual Input Hatch Data Stick", "ME库存输入总成配置数据");
+        provider.add("bettergtae.crafting_unit_tips.0","Can be simultaneously used for the fabrication of memory and parallel processing units","可同时用于合成成存储器与并行处理单元");
+        provider.add("bettergtae.machine.advanced_assembly_line.0","A more advanced assembly line that does not require sequential assembly","更加先进的装配线，不需要顺序组装");
+        provider.add("bettergtae.machine.advanced_assembly_line.1","Supports the ME Pattern Buffer and Parallel Hatch","支持样板总成与并行仓");
     }
 }

@@ -1,6 +1,9 @@
 package top.ialdaiaxiariyay.bettergtae;
 
 import top.ialdaiaxiariyay.bettergtae.api.registrate.BGTAERegistrate;
+import top.ialdaiaxiariyay.bettergtae.common.data.BGTAEBlocks;
+import top.ialdaiaxiariyay.bettergtae.common.data.BGTAEItems;
+import top.ialdaiaxiariyay.bettergtae.data.recipe.AddAllRecipes;
 import top.ialdaiaxiariyay.bettergtae.data.recipe.AssemblyLineRecipes;
 
 import com.gregtechceu.gtceu.api.addon.GTAddon;
@@ -20,7 +23,10 @@ public class BetterGTAEAddon implements IGTAddon {
     }
 
     @Override
-    public void initializeAddon() {}
+    public void initializeAddon() {
+        BGTAEBlocks.init();
+        BGTAEItems.init();
+    }
 
     @Override
     public String addonModId() {
@@ -29,6 +35,6 @@ public class BetterGTAEAddon implements IGTAddon {
 
     @Override
     public void addRecipes(Consumer<FinishedRecipe> provider) {
-        AssemblyLineRecipes.init(provider);
+        AddAllRecipes.init(provider);
     }
 }

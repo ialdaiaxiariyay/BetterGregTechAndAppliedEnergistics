@@ -1,21 +1,14 @@
 package top.ialdaiaxiariyay.bettergtae;
 
-import top.ialdaiaxiariyay.bettergtae.api.registrate.BGTAERegistrate;
-import top.ialdaiaxiariyay.bettergtae.common.data.BGTAECreativeModeTabs;
-import top.ialdaiaxiariyay.bettergtae.common.data.machine.BGTAEMachines;
-
-import com.gregtechceu.gtceu.api.GTCEuAPI;
-import com.gregtechceu.gtceu.api.machine.MachineDefinition;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.DistExecutor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-
-import com.mojang.logging.LogUtils;
-import org.slf4j.Logger;
+import top.ialdaiaxiariyay.bettergtae.client.ClientProxy;
+import top.ialdaiaxiariyay.bettergtae.common.CommonProxy;
 
 import static net.minecraft.resources.ResourceLocation.tryBuild;
 
@@ -23,28 +16,15 @@ import static net.minecraft.resources.ResourceLocation.tryBuild;
 public class BetterGTAE {
 
     public static final String MOD_ID = "bettergtae";
-    private static final Logger LOGGER = LogUtils.getLogger();
     public static final String NAME = "BetterGTAE";
+    public static final Logger LOGGER = LogManager.getLogger(NAME);
 
     public static ResourceLocation id(String name) {
         return tryBuild(MOD_ID, name);
     }
 
-    public BetterGTAE(FMLJavaModLoadingContext context) {
-        IEventBus modEventBus = context.getModEventBus();
-        BGTAERegistrate.REGISTRATE.registerEventListeners(modEventBus);
-        modEventBus.addListener(this::onCommonSetup);
-        modEventBus.addGenericListener(MachineDefinition.class, this::registerMachines);
-        BGTAECreativeModeTabs.init();
-    }
-
-    private void onCommonSetup(FMLCommonSetupEvent event) {
-        if (ModList.get().isLoaded("gtocore") && ModList.get().isLoaded("gtolib")) {
-            throw new RuntimeException("Unreachable operation and not compatible with mod GTOCORE, GTOLIB");
-        }
-    }
-
-    private void registerMachines(GTCEuAPI.RegisterEvent<ResourceLocation, MachineDefinition> event) {
-        BGTAEMachines.init();
+    public BetterGTAE(){
+        DistExecutor.unsafeRunForDist(() -> ClientProxy::new, () -> CommonProxy::new);
+        MinecraftForge.EVENT_BUS.register(this);
     }
 }

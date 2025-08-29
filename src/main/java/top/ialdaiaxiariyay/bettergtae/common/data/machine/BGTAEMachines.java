@@ -17,7 +17,9 @@ import static top.ialdaiaxiariyay.bettergtae.api.registrate.BGTAERegistrate.REGI
 
 public class BGTAEMachines {
 
-    public static void init() {}
+    public static void init() {
+        BGTAEMultiblockA.init();
+    }
 
     static {
         REGISTRATE.creativeModeTab(() -> BGTAECreativeModeTabs.MACHINE);
