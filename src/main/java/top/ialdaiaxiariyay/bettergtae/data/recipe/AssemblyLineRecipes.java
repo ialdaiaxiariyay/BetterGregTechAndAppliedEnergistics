@@ -2,6 +2,7 @@ package top.ialdaiaxiariyay.bettergtae.data.recipe;
 
 import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
 import top.ialdaiaxiariyay.bettergtae.common.data.BGTAEBlocks;
+import top.ialdaiaxiariyay.bettergtae.common.data.BGTAEItems;
 import top.ialdaiaxiariyay.bettergtae.common.data.machine.BGTAEMachines;
 import top.ialdaiaxiariyay.bettergtae.common.data.machine.BGTAEMultiblockA;
 
@@ -196,6 +197,40 @@ public class AssemblyLineRecipes {
                         .EUt(V[UV]))
                 .duration(20 * 50)
                 .EUt(V[UV], 16)
+                .save(provider);
+
+        GTRecipeTypes.ASSEMBLY_LINE_RECIPES.recipeBuilder(BetterGTAE.id("item_infinity_cell"))
+                .inputItems(AEItems.ITEM_CELL_HOUSING.asItem())
+                .inputItems(BGTAEBlocks.COMPUTING_CORE_MAX, 2)
+                .inputItems(CustomTags.UHV_CIRCUITS, 8)
+                .inputItems(AEItems.SINGULARITY.asItem(), 64)
+                .inputFluids(GTMaterials.SolderingAlloy, 2417)
+                .inputFluids(GTMaterials.SodiumPotassium, 1899)
+                .outputItems(BGTAEItems.ITEM_INFINITY_CELL)
+                .stationResearch(b -> b
+                        .researchStack(AEItems.ITEM_CELL_256K.stack())
+                        .dataStack(GTItems.TOOL_DATA_MODULE.asStack())
+                        .CWUt(128)
+                        .EUt(V[UV]))
+                .duration(20 * 80)
+                .EUt(V[UHV], 16)
+                .save(provider);
+
+        GTRecipeTypes.ASSEMBLY_LINE_RECIPES.recipeBuilder(BetterGTAE.id("fluid_infinity_cell"))
+                .inputItems(AEItems.FLUID_CELL_HOUSING.asItem())
+                .inputItems(BGTAEBlocks.COMPUTING_CORE_MAX, 2)
+                .inputItems(CustomTags.UHV_CIRCUITS, 8)
+                .inputItems(AEItems.SINGULARITY.asItem(), 64)
+                .inputFluids(GTMaterials.SolderingAlloy, 2417)
+                .inputFluids(GTMaterials.SodiumPotassium, 1899)
+                .outputItems(BGTAEItems.FLUID_INFINITY_CELL)
+                .stationResearch(b -> b
+                        .researchStack(AEItems.FLUID_CELL_256K.stack())
+                        .dataStack(GTItems.TOOL_DATA_MODULE.asStack())
+                        .CWUt(128)
+                        .EUt(V[UV]))
+                .duration(20 * 80)
+                .EUt(V[UHV], 16)
                 .save(provider);
     }
 }

@@ -2,14 +2,18 @@ package top.ialdaiaxiariyay.bettergtae;
 
 import top.ialdaiaxiariyay.bettergtae.client.ClientProxy;
 import top.ialdaiaxiariyay.bettergtae.common.CommonProxy;
+import top.ialdaiaxiariyay.bettergtae.data.StorageManager;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Objects;
 
 import static net.minecraft.resources.ResourceLocation.tryBuild;
 
@@ -19,6 +23,7 @@ public class BetterGTAE {
     public static final String MOD_ID = "bettergtae";
     public static final String NAME = "BetterGTAE";
     public static final Logger LOGGER = LogManager.getLogger(NAME);
+    public static StorageManager STORAGE_INSTANCE = new StorageManager();
 
     public static ResourceLocation id(String name) {
         return tryBuild(MOD_ID, name);
@@ -27,5 +32,12 @@ public class BetterGTAE {
     public BetterGTAE() {
         DistExecutor.unsafeRunForDist(() -> ClientProxy::new, () -> CommonProxy::new);
         MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.addListener(this::worldTick);
+    }
+
+    public void worldTick(TickEvent.LevelTickEvent event) {
+        if (event.phase == TickEvent.Phase.START && event.side.isServer()) {
+            STORAGE_INSTANCE = StorageManager.getInstance(Objects.requireNonNull(event.level.getServer()));
+        }
     }
 }
