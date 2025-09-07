@@ -15,5 +15,6 @@ public class BlockLang {
         provider.add("block.bettergtae.256m_computing_core", "256M Computing Core", "256M 计算核心");
         provider.add("block.bettergtae.max_computing_core", "MAX Computing Core", "MAX 计算核心");
         provider.add("block.bettergtae.advanced_assembly_line", "Advanced Assembly Line", "进阶装配线");
+        provider.add("block.bettergtae.cleanroom_sterile_maintenance_hatch", "Sterile Cleanroom Maintenance Hatch", "无菌超净维护仓");
     }
 }

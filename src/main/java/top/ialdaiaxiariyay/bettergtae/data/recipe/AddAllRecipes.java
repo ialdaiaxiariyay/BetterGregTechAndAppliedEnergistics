@@ -12,5 +12,6 @@ public class AddAllRecipes {
         MaceratorRecipes.init(provider);
         ElectrolyzerRecipe.init(provider);
         MixerRecipes.init(provider);
+        VanillaRecipe.init(provider);
     }
 }

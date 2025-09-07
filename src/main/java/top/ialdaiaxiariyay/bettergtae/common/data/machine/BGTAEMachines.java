@@ -8,11 +8,14 @@ import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.MEDualHatch
 import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.data.RotationState;
 import com.gregtechceu.gtceu.api.machine.MachineDefinition;
+import com.gregtechceu.gtceu.api.machine.multiblock.CleanroomType;
 import com.gregtechceu.gtceu.api.machine.multiblock.PartAbility;
+import com.gregtechceu.gtceu.common.machine.multiblock.part.CleaningMaintenanceHatchPartMachine;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 
-import static com.gregtechceu.gtceu.api.GTValues.LuV;
+import static com.gregtechceu.gtceu.api.GTValues.*;
 import static top.ialdaiaxiariyay.bettergtae.api.registrate.BGTAERegistrate.REGISTRATE;
 
 public class BGTAEMachines {
@@ -70,5 +73,21 @@ public class BGTAEMachines {
                     Component.translatable("bettergtae.machine.me_stocking_dual_input_hatch.tooltip.3"),
                     Component.translatable("gtceu.part_sharing.enabled"))
             .colorOverlayTieredHullModel(GTCEu.id("block/overlay/appeng/me_input_bus"))
+            .register();
+
+    public static final MachineDefinition STERILE_CLEANING_MAINTENANCE_HATCH = REGISTRATE
+            .machine("cleanroom_sterile_maintenance_hatch",
+                    holder -> new CleaningMaintenanceHatchPartMachine(holder, CleanroomType.STERILE_CLEANROOM))
+            .rotationState(RotationState.ALL)
+            .abilities(PartAbility.MAINTENANCE)
+            .tooltips(Component.translatable("gtceu.part_sharing.disabled"),
+                    Component.translatable("gtceu.machine.maintenance_hatch_cleanroom_auto.tooltip.0"),
+                    Component.translatable("gtceu.machine.maintenance_hatch_cleanroom_auto.tooltip.1"))
+            .tooltipBuilder((stack, tooltips) -> {
+                tooltips.add(Component.literal("  ").append(Component
+                        .translatable(CleanroomType.STERILE_CLEANROOM.getTranslationKey()).withStyle(ChatFormatting.GREEN)));
+            })
+            .overlayTieredHullModel(GTCEu.id("block/machine/part/cleaning_maintenance_hatch"))
+            .tier(ZPM)
             .register();
 }
