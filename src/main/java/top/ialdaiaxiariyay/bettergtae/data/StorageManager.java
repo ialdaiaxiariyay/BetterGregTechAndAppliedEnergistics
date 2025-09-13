@@ -85,6 +85,6 @@ public class StorageManager extends SavedData {
     public static StorageManager getInstance(MinecraftServer server) {
         ServerLevel world = server.getLevel(ServerLevel.OVERWORLD);
         return Objects.requireNonNull(world).getDataStorage().computeIfAbsent(StorageManager::readNbt, StorageManager::new,
-                "disk_manager");
+                "bettergtae_disk_manager");
     }
 }

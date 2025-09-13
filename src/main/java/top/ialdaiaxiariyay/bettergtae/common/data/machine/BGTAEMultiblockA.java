@@ -50,7 +50,6 @@ public class BGTAEMultiblockA {
                             .or(Predicates.abilities(PartAbility.IMPORT_ITEMS))
                             .or(Predicates.abilities(PartAbility.IMPORT_FLUIDS))
                             .or(Predicates.abilities(PartAbility.EXPORT_ITEMS))
-                            .or(Predicates.abilities(PartAbility.EXPORT_FLUIDS))
                             .or(Predicates.abilities(PartAbility.PARALLEL_HATCH)))
                     .where("F", Predicates.blocks(CASING_ASSEMBLY_LINE.get()))
                     .where('G', dataHatchPredicate(blocks(CASING_STEEL_SOLID.get())))

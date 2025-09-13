@@ -30,7 +30,7 @@ public class MixerRecipes {
         GTRecipeTypes.MIXER_RECIPES.recipeBuilder(BetterGTAE.id("fluix_crystal_1"))
                 .inputFluids(new FluidStack(Fluids.WATER, 500))
                 .inputItems(AEItems.CERTUS_QUARTZ_CRYSTAL_CHARGED.asItem())
-                .inputItems(AEItems.FLUIX_DUST)
+                .inputItems(AEItems.FLUIX_DUST.asItem())
                 .outputItems(AEItems.FLUIX_CRYSTAL.asItem())
                 .duration(20)
                 .EUt(GTValues.V[GTValues.LV])
