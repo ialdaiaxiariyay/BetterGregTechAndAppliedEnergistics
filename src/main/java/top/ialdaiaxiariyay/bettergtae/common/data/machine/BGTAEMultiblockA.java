@@ -46,7 +46,7 @@ public class BGTAEMultiblockA {
                     .where("D", Predicates.blocks(CASING_ASSEMBLY_CONTROL.get()))
                     .where("C", Predicates.blocks(CASING_LAMINATED_GLASS.get()))
                     .where("E", Predicates.blocks(CASING_STEEL_SOLID.get())
-                            .or(Predicates.abilities(PartAbility.INPUT_ENERGY)).setMinGlobalLimited(1).setMaxGlobalLimited(2)
+                            .or(Predicates.abilities(PartAbility.INPUT_ENERGY).setMinGlobalLimited(1).setMaxGlobalLimited(2))
                             .or(Predicates.abilities(PartAbility.IMPORT_ITEMS))
                             .or(Predicates.abilities(PartAbility.IMPORT_FLUIDS))
                             .or(Predicates.abilities(PartAbility.EXPORT_ITEMS))

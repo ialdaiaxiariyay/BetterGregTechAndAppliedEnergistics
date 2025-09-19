@@ -7,6 +7,8 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import org.jetbrains.annotations.NotNull;
@@ -39,5 +41,18 @@ public class RegistriesUtil {
             return Items.AIR;
         }
         return item;
+    }
+
+    public static Fluid getFluid(String string) {
+        Fluid fluid = ForgeRegistries.FLUIDS.getValue(ResourceLocation.parse(string));
+        if (fluid == null) {
+            BetterGTAE.LOGGER.error("Fluid {} is null", string);
+            return Fluids.WATER;
+        }
+        return fluid;
+    }
+
+    public static @NotNull String FluidId(Fluid fluids) {
+        return Objects.requireNonNull(ForgeRegistries.FLUIDS.getKey(fluids)).toString();
     }
 }
