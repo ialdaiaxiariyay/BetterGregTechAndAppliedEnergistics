@@ -1,5 +1,8 @@
 package top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part;
 
+import top.ialdaiaxiariyay.bettergtae.api.gui.MultiCircuitConfigurator;
+import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.trait.ExtendInternalSlotRecipeHandler;
+
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
 import com.gregtechceu.gtceu.api.gui.fancy.ConfiguratorPanel;
@@ -8,7 +11,6 @@ import com.gregtechceu.gtceu.api.machine.MetaMachine;
 import com.gregtechceu.gtceu.api.machine.MultiblockMachineDefinition;
 import com.gregtechceu.gtceu.api.machine.TickableSubscription;
 import com.gregtechceu.gtceu.api.machine.fancyconfigurator.ButtonConfigurator;
-import com.gregtechceu.gtceu.api.machine.fancyconfigurator.CircuitFancyConfigurator;
 import com.gregtechceu.gtceu.api.machine.fancyconfigurator.FancyInvConfigurator;
 import com.gregtechceu.gtceu.api.machine.fancyconfigurator.FancyTankConfigurator;
 import com.gregtechceu.gtceu.api.machine.feature.IDataStickInteractable;
@@ -27,17 +29,6 @@ import com.gregtechceu.gtceu.integration.ae2.machine.MEBusPartMachine;
 import com.gregtechceu.gtceu.utils.GTMath;
 import com.gregtechceu.gtceu.utils.ItemStackHashStrategy;
 
-import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
-import com.lowdragmc.lowdraglib.gui.util.ClickData;
-import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
-import com.lowdragmc.lowdraglib.gui.widget.Widget;
-import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
-import com.lowdragmc.lowdraglib.syncdata.IContentChangeAware;
-import com.lowdragmc.lowdraglib.syncdata.ITagSerializable;
-import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
-import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
-import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
-
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -52,6 +43,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
+import net.minecraftforge.items.ItemStackHandler;
 
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.crafting.PatternDetailsHelper;
@@ -68,14 +60,21 @@ import appeng.crafting.pattern.ProcessingPatternItem;
 import appeng.helpers.patternprovider.PatternContainer;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
+import com.lowdragmc.lowdraglib.gui.util.ClickData;
+import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
+import com.lowdragmc.lowdraglib.gui.widget.Widget;
+import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import com.lowdragmc.lowdraglib.syncdata.IContentChangeAware;
+import com.lowdragmc.lowdraglib.syncdata.ITagSerializable;
+import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
+import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
+import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
 import it.unimi.dsi.fastutil.objects.*;
 import lombok.Getter;
 import lombok.Setter;
-import net.minecraftforge.items.ItemStackHandler;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
-import top.ialdaiaxiariyay.bettergtae.api.gui.MultiCircuitConfigurator;
-import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.trait.ExtendInternalSlotRecipeHandler;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -88,7 +87,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
-        implements ICraftingProvider, PatternContainer, IDataStickInteractable {
+                                              implements ICraftingProvider, PatternContainer, IDataStickInteractable {
 
     protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(
             ExtendMEPatternBufferPartMachine.class, MEBusPartMachine.MANAGED_FIELD_HOLDER);
@@ -462,6 +461,7 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
         private List<FluidStack> fluidStacks = null;
         @Getter
         private final NotifiableItemStackHandler circuitInventory;
+
         public InternalSlot(ExtendMEPatternBufferPartMachine machine) {
             this.circuitInventory = new NotifiableItemStackHandler(machine, 1, IO.IN, IO.NONE) {
 

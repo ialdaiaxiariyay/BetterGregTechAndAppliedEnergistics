@@ -1,5 +1,8 @@
 package top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.trait;
 
+import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferPartMachine;
+import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferPartMachine.InternalSlot;
+
 import com.gregtechceu.gtceu.api.capability.recipe.*;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableRecipeHandlerTrait;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerGroupDistinctness;
@@ -13,8 +16,7 @@ import net.minecraftforge.fluids.FluidStack;
 
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
-import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferPartMachine;
-import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferPartMachine.InternalSlot;
+
 import java.util.ArrayList;
 import java.util.List;
 
