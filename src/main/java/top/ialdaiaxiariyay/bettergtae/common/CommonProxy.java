@@ -30,9 +30,6 @@ public class CommonProxy {
     }
 
     private void onCommonSetup(FMLCommonSetupEvent event) {
-        if (ModList.get().isLoaded("gtocore") && ModList.get().isLoaded("gtolib")) {
-            throw new RuntimeException("Unreachable operation and not compatible with mod GTOCORE, GTOLIB");
-        }
         StorageCells.addCellHandler(InfinityCellHandler.INSTANCE);
         StorageCells.addCellGuiHandler(new InfinityCellGuiHandler());
     }
