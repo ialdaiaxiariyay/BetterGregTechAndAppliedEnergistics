@@ -156,8 +156,8 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
             this.internalInventory[i] = new InternalSlot(this);
         }
         getMainNode().addService(ICraftingProvider.class, this);
-        this.shareInventory = new NotifiableItemStackHandler(this, 9, IO.IN, IO.NONE);
-        this.shareTank = new NotifiableFluidTank(this, 9, 8 * FluidType.BUCKET_VOLUME, IO.IN, IO.NONE);
+        this.shareInventory = new NotifiableItemStackHandler(this, 16, IO.IN, IO.NONE);
+        this.shareTank = new NotifiableFluidTank(this, 16, 8 * FluidType.BUCKET_VOLUME, IO.IN, IO.NONE);
         this.internalRecipeHandler = new ExtendInternalSlotRecipeHandler(this, internalInventory);
     }
 
