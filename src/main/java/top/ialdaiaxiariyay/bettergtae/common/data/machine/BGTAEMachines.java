@@ -1,6 +1,7 @@
 package top.ialdaiaxiariyay.bettergtae.common.data.machine;
 
 import top.ialdaiaxiariyay.bettergtae.common.data.BGTAECreativeModeTabs;
+import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.CraftingPatternPartMachine;
 import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferPartMachine;
 import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferProxyPartMachine;
 import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.MEDualHatchPartMachine;
@@ -89,5 +90,13 @@ public class BGTAEMachines {
             })
             .overlayTieredHullModel(GTCEu.id("block/machine/part/cleaning_maintenance_hatch"))
             .tier(ZPM)
+            .register();
+
+    public static final MachineDefinition CRAFTING_PATTERN_HATCH = REGISTRATE
+            .machine("crafting_pattern_hatch", CraftingPatternPartMachine::new)
+            .tier(LuV)
+            .rotationState(RotationState.ALL)
+            .rotationState(RotationState.ALL)
+            .colorOverlayTieredHullModel(GTCEu.id("block/overlay/appeng/me_buffer_hatch"))
             .register();
 }

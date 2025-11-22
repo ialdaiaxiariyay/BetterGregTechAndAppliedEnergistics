@@ -16,5 +16,6 @@ public class TipsLang {
         provider.add("bettergtae.crafting_unit_tips.0", "Can be simultaneously used for the fabrication of memory and parallel processing units", "可同时用于合成成存储器与并行处理单元");
         provider.add("bettergtae.machine.advanced_assembly_line.0", "A more advanced assembly line that does not require sequential assembly", "更加先进的装配线，不需要顺序组装");
         provider.add("bettergtae.machine.advanced_assembly_line.1", "Supports the ME Pattern Buffer and Parallel Hatch", "支持样板总成与并行仓");
+        provider.add("bettergtae.machine.large_molecular_assembler.0", "GT-Style Molecular Assembly Chamber: Larger, Better, More Powerful", "GT式的分子装配室，更大，更好，更强");
     }
 }
