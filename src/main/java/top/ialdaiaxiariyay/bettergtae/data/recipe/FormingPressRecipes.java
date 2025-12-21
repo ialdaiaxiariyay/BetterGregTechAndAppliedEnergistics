@@ -57,7 +57,7 @@ public class FormingPressRecipes {
                 .save(provider);
 
         GTRecipeTypes.FORMING_PRESS_RECIPES.recipeBuilder(BetterGTAE.id("printed_logic_processor"))
-                .notConsumable(AEItems.ENGINEERING_PROCESSOR_PRESS.asItem())
+                .notConsumable(AEItems.LOGIC_PROCESSOR_PRESS.asItem())
                 .inputItems(Items.GOLD_INGOT.asItem())
                 .outputItems(AEItems.LOGIC_PROCESSOR_PRINT.asItem())
                 .duration(20)
