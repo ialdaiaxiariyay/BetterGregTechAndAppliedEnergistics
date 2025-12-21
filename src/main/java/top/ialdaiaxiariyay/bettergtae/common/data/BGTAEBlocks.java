@@ -33,7 +33,7 @@ public class BGTAEBlocks {
                     String unformed = "block/crafting/" + baseName;
                     provider.models().cubeAll(unformed, provider.modLoc("block/crafting/" + baseName));
                     provider.models().getBuilder(formed)
-                            .parent(provider.models().getExistingFile(new ResourceLocation("block/block")))
+                            .parent(provider.models().getExistingFile(ResourceLocation.tryParse("block/block")))
                             .texture("particle", provider.modLoc("block/crafting/" + baseName))
                             .texture("light", provider.modLoc("block/crafting/" + baseName + "_light"))
                             .element()

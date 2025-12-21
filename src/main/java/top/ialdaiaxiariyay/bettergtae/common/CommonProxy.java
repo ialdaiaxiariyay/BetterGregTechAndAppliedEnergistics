@@ -19,6 +19,7 @@ import appeng.api.storage.StorageCells;
 
 public class CommonProxy {
 
+    @SuppressWarnings("removal")
     public CommonProxy() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         BGTAERegistrate.REGISTRATE.registerEventListeners(modEventBus);
