@@ -16,7 +16,6 @@ import com.gregtechceu.gtceu.api.recipe.content.Content;
 import com.gregtechceu.gtceu.api.recipe.ingredient.SizedIngredient;
 import com.gregtechceu.gtceu.data.recipe.builder.GTRecipeBuilder;
 
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
 
 import appeng.api.stacks.AEItemKey;
@@ -67,19 +66,26 @@ public class LargeMolecularAssembler extends WorkableElectricMultiblockMachine {
         GTRecipe output = GTRecipeBuilder.ofRaw().buildRawRecipe();
         List<Content> outputList = output.outputs.computeIfAbsent(ItemRecipeCapability.CAP, cap -> new ObjectArrayList<>());
         long remain = getHatchParallel(this);
-        for (var it = Object2LongMaps.fastIterator(craftingPatternPartMachine.getOutputItems()); it.hasNext() && remain > 0;) {
+
+        for (var it = Object2LongMaps.fastIterator(craftingPatternPartMachine.outputItems); it.hasNext() && remain > 0;) {
             var entry = it.next();
             var key = entry.getKey();
             if (!(key.what() instanceof AEItemKey aeItemKey)) {
                 it.remove();
                 continue;
             }
-            Item item = aeItemKey.getItem();
+
             long multiply = entry.getLongValue();
+            long extract = Math.min(multiply, remain);
 
-            int extract = Math.toIntExact(Math.min(multiply, remain));
+            long totalItems = extract * key.amount();
 
-            var cont = new Content(SizedIngredient.create(Ingredient.of(item), (int) (extract * key.amount())), ChanceLogic.getMaxChancedValue(), ChanceLogic.getMaxChancedValue(), 0);
+            var cont = new Content(
+                    SizedIngredient.create(Ingredient.of(aeItemKey.getItem()), (int) totalItems),
+                    ChanceLogic.getMaxChancedValue(),
+                    ChanceLogic.getMaxChancedValue(),
+                    0
+            );
             outputList.add(cont);
 
             remain -= extract;
@@ -89,7 +95,7 @@ public class LargeMolecularAssembler extends WorkableElectricMultiblockMachine {
         }
         if (outputList.isEmpty()) return null;
         else {
-            output.duration = this.tier * 20;
+            output.duration = this.tier * 10;
             return output;
         }
     }

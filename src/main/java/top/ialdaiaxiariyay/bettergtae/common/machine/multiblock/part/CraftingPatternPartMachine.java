@@ -126,8 +126,7 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
     @Nullable
     protected TickableSubscription updateSubs;
 
-    @Getter
-    private final Object2LongLinkedOpenHashMap<GenericStack> outputItems;
+    public final Object2LongLinkedOpenHashMap<GenericStack> outputItems;
 
     @Getter
     private final BiMap<@NotNull IPatternDetails, Integer> patternSlotMap;
