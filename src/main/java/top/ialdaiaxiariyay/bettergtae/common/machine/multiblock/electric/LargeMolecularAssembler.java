@@ -84,8 +84,7 @@ public class LargeMolecularAssembler extends WorkableElectricMultiblockMachine {
                     SizedIngredient.create(Ingredient.of(aeItemKey.getItem()), (int) totalItems),
                     ChanceLogic.getMaxChancedValue(),
                     ChanceLogic.getMaxChancedValue(),
-                    0
-            );
+                    0);
             outputList.add(cont);
 
             remain -= extract;
