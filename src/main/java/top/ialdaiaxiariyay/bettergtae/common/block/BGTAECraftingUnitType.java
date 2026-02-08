@@ -1,12 +1,11 @@
 package top.ialdaiaxiariyay.bettergtae.common.block;
 
-import top.ialdaiaxiariyay.bettergtae.common.data.BGTAEBlocks;
-
 import net.minecraft.world.item.Item;
 
 import appeng.block.crafting.ICraftingUnitType;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import lombok.Getter;
+import top.ialdaiaxiariyay.bettergtae.common.data.BGTAEBlocks;
 
 public enum BGTAECraftingUnitType implements ICraftingUnitType {
 
@@ -50,6 +49,6 @@ public enum BGTAECraftingUnitType implements ICraftingUnitType {
 
     @Override
     public Item getItemFromType() {
-        return getDefinition().asItem();
+        return getDefinition().get().asItem();
     }
 }

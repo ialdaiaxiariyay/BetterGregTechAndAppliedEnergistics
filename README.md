@@ -2,3 +2,4 @@
 ### This mod adds new components to the Applied Energistics 2 (AE2) system in GregTech Modern.
 # This mod utilizes code from other mods. Below are the links to their repositories:
 **[GTLCore](https://github.com/AaAdoniSsS/GTLCore)**
+# The project employs the Gradle from [GregTech-Modern](https://github.com/GregTechCEu/GregTech-Modern).

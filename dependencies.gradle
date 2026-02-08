@@ -1,0 +1,36 @@
+dependencies {
+    compileOnly(libs.jetbrains.annotations)
+
+    //gtceu
+    modImplementation(forge.gtceu)
+    modImplementation(forge.ldlib)
+    modImplementation(forge.registrate)
+    modImplementation(forge.configuration)
+
+    //Mixin
+    annotationProcessor(variantOf(libs.mixin) { classifier("processor") })
+    compileOnly(annotationProcessor(forge.mixinExtras.common.get()))
+    modImplementation(api(forge.mixinExtras.forge.get()))
+
+    //jei
+    modImplementation(forge.bundles.jei)
+    modImplementation(forge.emi)
+
+    modImplementation(forge.jade)
+
+    // AE2
+    modImplementation(forge.ae2)
+    modImplementation(forge.guideme)
+
+    modImplementation(forge.bundles.kjs)
+
+    modImplementation(forge.embeddium)
+
+    modRuntimeOnly(forge.jech)
+
+    // ftb
+    modRuntimeOnly(forge.ftblibrary)
+    modRuntimeOnly(forge.ftbteams)
+    modRuntimeOnly(forge.ftbultimine)
+    modRuntimeOnly(forge.ftbchunks)
+}

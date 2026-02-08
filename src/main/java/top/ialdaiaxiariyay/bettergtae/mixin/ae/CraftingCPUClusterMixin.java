@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.List;
 
-@Mixin(value = CraftingCPUCluster.class, priority = 999)
+@Mixin(CraftingCPUCluster.class)
 public abstract class CraftingCPUClusterMixin {
 
     @Shadow(remap = false)

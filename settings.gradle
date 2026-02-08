@@ -1,12 +1,22 @@
-plugins {
-    id 'org.gradle.toolchains.foojay-resolver-convention' version '1.0.0'
+pluginManagement {
+    repositories {
+        maven { url = "https://maven.minecraftforge.net/" }
+        gradlePluginPortal()
+    }
+    plugins {
+        id 'org.jetbrains.kotlin.jvm' version '2.0.21'
+    }
 }
 
 dependencyResolutionManagement {
+    repositories {
+        mavenCentral()
+    }
     versionCatalogs {
-        libs {
-            version("jetbrains-annotations", "26.0.1")
-            library("jetbrains-annotations", "org.jetbrains", "annotations").versionRef("jetbrains-annotations")
+        forge {
+            from(files("gradle/forge.versions.toml"))
         }
     }
 }
+
+rootProject.name = "${mod_id}"

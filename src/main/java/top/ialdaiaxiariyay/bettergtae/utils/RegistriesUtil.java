@@ -1,7 +1,5 @@
 package top.ialdaiaxiariyay.bettergtae.utils;
 
-import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
-
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -12,6 +10,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import org.jetbrains.annotations.NotNull;
+import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
 
 import java.util.Objects;
 
@@ -22,7 +21,7 @@ public class RegistriesUtil {
     }
 
     public static Block getBlock(String string) {
-        Block block = ForgeRegistries.BLOCKS.getValue(ResourceLocation.parse(string));
+        Block block = ForgeRegistries.BLOCKS.getValue(ResourceLocation.tryParse(string));
         if (block == null) {
             BetterGTAE.LOGGER.error("Block {} is null", string);
             return Blocks.AIR;
@@ -35,7 +34,7 @@ public class RegistriesUtil {
     }
 
     public static Item getItem(String string) {
-        Item item = ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(string));
+        Item item = ForgeRegistries.ITEMS.getValue(ResourceLocation.tryParse(string));
         if (item == null) {
             BetterGTAE.LOGGER.error("Item {} is null", string);
             return Items.AIR;
@@ -44,7 +43,7 @@ public class RegistriesUtil {
     }
 
     public static Fluid getFluid(String string) {
-        Fluid fluid = ForgeRegistries.FLUIDS.getValue(ResourceLocation.parse(string));
+        Fluid fluid = ForgeRegistries.FLUIDS.getValue(ResourceLocation.tryParse(string));
         if (fluid == null) {
             BetterGTAE.LOGGER.error("Fluid {} is null", string);
             return Fluids.WATER;
