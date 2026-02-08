@@ -1,10 +1,12 @@
 package top.ialdaiaxiariyay.bettergtae.common.block;
 
+import com.gregtechceu.gtceu.GTCEu;
 import net.minecraft.world.item.Item;
 
 import appeng.block.crafting.ICraftingUnitType;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import lombok.Getter;
+import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
 import top.ialdaiaxiariyay.bettergtae.common.data.BGTAEBlocks;
 
 public enum BGTAECraftingUnitType implements ICraftingUnitType {
@@ -33,6 +35,9 @@ public enum BGTAECraftingUnitType implements ICraftingUnitType {
 
     @Override
     public int getAcceleratorThreads() {
+        if (BetterGTAE.IsLoadMixin()) {
+            return 0;
+        }
         return storageMb == -1 ? Integer.MAX_VALUE - 1 : 1024 * 1024 * storageMb;
     }
 

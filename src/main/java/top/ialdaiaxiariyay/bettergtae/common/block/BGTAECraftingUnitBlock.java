@@ -8,6 +8,7 @@ import net.minecraft.world.level.BlockGetter;
 import appeng.block.crafting.CraftingUnitBlock;
 import appeng.block.crafting.ICraftingUnitType;
 import org.jetbrains.annotations.NotNull;
+import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
 
 import java.util.List;
 
@@ -19,6 +20,7 @@ public class BGTAECraftingUnitBlock extends CraftingUnitBlock {
 
     @Override
     public void appendHoverText(@NotNull ItemStack stack, BlockGetter level, @NotNull List<Component> tooltip, @NotNull TooltipFlag flag) {
+        if (BetterGTAE.IsLoadMixin()) return;
         tooltip.add(Component.translatable("bettergtae.crafting_unit_tips.0"));
     }
 }

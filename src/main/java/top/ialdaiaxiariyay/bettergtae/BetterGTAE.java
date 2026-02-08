@@ -1,5 +1,6 @@
 package top.ialdaiaxiariyay.bettergtae;
 
+import com.gregtechceu.gtceu.GTCEu;
 import top.ialdaiaxiariyay.bettergtae.client.ClientProxy;
 import top.ialdaiaxiariyay.bettergtae.common.CommonProxy;
 import top.ialdaiaxiariyay.bettergtae.data.StorageManager;
@@ -39,5 +40,9 @@ public class BetterGTAE {
         if (event.phase == TickEvent.Phase.START && event.side.isServer()) {
             STORAGE_INSTANCE = StorageManager.getInstance(Objects.requireNonNull(event.level.getServer()));
         }
+    }
+
+    public static boolean IsLoadMixin(){
+        return GTCEu.isModLoaded("mae2") || GTCEu.isModLoaded("extendedae_plus") || GTCEu.isModLoaded("bigger_ae2");
     }
 }
