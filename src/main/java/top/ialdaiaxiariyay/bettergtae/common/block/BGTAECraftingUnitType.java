@@ -1,6 +1,5 @@
 package top.ialdaiaxiariyay.bettergtae.common.block;
 
-import com.gregtechceu.gtceu.GTCEu;
 import net.minecraft.world.item.Item;
 
 import appeng.block.crafting.ICraftingUnitType;
