@@ -28,7 +28,8 @@ jobs:
         uses: gradle/actions/setup-gradle@v3
         with:
           gradle-version: wrapper
-
+      - name: Make gradlew executable
+        run: chmod +x gradlew
       - name: Publish Snapshot to GitHub Packages
         run: ./gradlew publish
         env:
