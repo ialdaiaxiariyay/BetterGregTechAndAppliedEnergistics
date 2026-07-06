@@ -1,9 +1,7 @@
 package top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.trait;
 
-import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferPartMachine;
-import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferPartMachine.InternalSlot;
-
 import com.gregtechceu.gtceu.api.capability.recipe.*;
+import com.gregtechceu.gtceu.api.machine.trait.MachineTraitType;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableRecipeHandlerTrait;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerGroupDistinctness;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
@@ -16,6 +14,8 @@ import net.minecraftforge.fluids.FluidStack;
 
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
+import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferPartMachine;
+import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferPartMachine.InternalSlot;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +25,8 @@ public final class ExtendInternalSlotRecipeHandler {
     @Getter
     private final List<RecipeHandlerList> slotHandlers;
 
-    public ExtendInternalSlotRecipeHandler(ExtendMEPatternBufferPartMachine buffer, InternalSlot[] slots) {
+    public ExtendInternalSlotRecipeHandler(ExtendMEPatternBufferPartMachine buffer,
+                                           ExtendMEPatternBufferPartMachine.InternalSlot[] slots) {
         this.slotHandlers = new ArrayList<>(slots.length);
         for (int i = 0; i < slots.length; i++) {
             var rhl = new SlotRHL(buffer, slots[i], i);
@@ -41,8 +42,8 @@ public final class ExtendInternalSlotRecipeHandler {
 
         public SlotRHL(ExtendMEPatternBufferPartMachine buffer, InternalSlot slot, int idx) {
             super(IO.IN);
-            itemRecipeHandler = new SlotItemRecipeHandler(buffer, slot, idx);
-            fluidRecipeHandler = new SlotFluidRecipeHandler(buffer, slot, idx);
+            itemRecipeHandler = buffer.attachTrait(new SlotItemRecipeHandler(slot, idx));
+            fluidRecipeHandler = buffer.attachTrait(new SlotFluidRecipeHandler(slot, idx));
             addHandlers(slot.getCircuitInventory(), buffer.getShareInventory(), buffer.getShareTank(),
                     itemRecipeHandler, fluidRecipeHandler);
             this.setGroup(RecipeHandlerGroupDistinctness.BUS_DISTINCT);
@@ -60,6 +61,14 @@ public final class ExtendInternalSlotRecipeHandler {
     @Getter
     private static class SlotItemRecipeHandler extends NotifiableRecipeHandlerTrait<Ingredient> {
 
+        public static final MachineTraitType<SlotItemRecipeHandler> TYPE = new MachineTraitType<>(
+                SlotItemRecipeHandler.class);
+
+        @Override
+        public @NotNull MachineTraitType<SlotItemRecipeHandler> getTraitType() {
+            return TYPE;
+        }
+
         private final InternalSlot slot;
         private final int priority;
 
@@ -68,15 +77,16 @@ public final class ExtendInternalSlotRecipeHandler {
         private final IO handlerIO = IO.IN;
         private final boolean isDistinct = true;
 
-        private SlotItemRecipeHandler(ExtendMEPatternBufferPartMachine buffer, InternalSlot slot, int index) {
-            super(buffer);
+        private SlotItemRecipeHandler(InternalSlot slot, int index) {
+            super();
             this.slot = slot;
             this.priority = IFilteredHandler.HIGH + index + 1;
             slot.setOnContentsChanged(this::notifyListeners);
         }
 
         @Override
-        public List<Ingredient> handleRecipeInner(IO io, GTRecipe recipe, List<Ingredient> left, boolean simulate) {
+        public @NotNull List<Ingredient> handleRecipeInner(IO io, GTRecipe recipe, List<Ingredient> left,
+                                                           boolean simulate) {
             if (io != IO.IN || slot.isItemEmpty()) return left;
             return slot.handleItemInternal(left, simulate);
         }
@@ -95,6 +105,14 @@ public final class ExtendInternalSlotRecipeHandler {
     @Getter
     private static class SlotFluidRecipeHandler extends NotifiableRecipeHandlerTrait<FluidIngredient> {
 
+        public static final MachineTraitType<SlotFluidRecipeHandler> TYPE = new MachineTraitType<>(
+                SlotFluidRecipeHandler.class);
+
+        @Override
+        public @NotNull MachineTraitType<SlotFluidRecipeHandler> getTraitType() {
+            return TYPE;
+        }
+
         private final InternalSlot slot;
         private final int priority;
 
@@ -103,16 +121,16 @@ public final class ExtendInternalSlotRecipeHandler {
         private final IO handlerIO = IO.IN;
         private final boolean isDistinct = true;
 
-        private SlotFluidRecipeHandler(ExtendMEPatternBufferPartMachine buffer, InternalSlot slot, int index) {
-            super(buffer);
+        private SlotFluidRecipeHandler(InternalSlot slot, int index) {
+            super();
             this.slot = slot;
             this.priority = IFilteredHandler.HIGH + index + 1;
             slot.setOnContentsChanged(this::notifyListeners);
         }
 
         @Override
-        public List<FluidIngredient> handleRecipeInner(IO io, GTRecipe recipe, List<FluidIngredient> left,
-                                                       boolean simulate) {
+        public @NotNull List<FluidIngredient> handleRecipeInner(IO io, GTRecipe recipe, List<FluidIngredient> left,
+                                                                boolean simulate) {
             if (io != IO.IN || slot.isFluidEmpty()) return left;
             return slot.handleFluidInternal(left, simulate);
         }

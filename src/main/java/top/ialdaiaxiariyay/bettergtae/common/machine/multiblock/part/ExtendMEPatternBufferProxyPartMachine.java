@@ -1,33 +1,33 @@
 package top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part;
 
-import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.trait.ExtendProxySlotRecipeHandler;
-
 import com.gregtechceu.gtceu.api.GTValues;
+import com.gregtechceu.gtceu.api.blockentity.BlockEntityCreationInfo;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
-import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.MetaMachine;
 import com.gregtechceu.gtceu.api.machine.feature.IDataStickInteractable;
-import com.gregtechceu.gtceu.api.machine.feature.IMachineLife;
+import com.gregtechceu.gtceu.api.machine.feature.IMuiMachine;
+import com.gregtechceu.gtceu.api.machine.mui.MachineUIPanelBuilder;
 import com.gregtechceu.gtceu.api.machine.multiblock.part.TieredIOPartMachine;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
+import com.gregtechceu.gtceu.api.sync_system.annotations.SaveField;
+import com.gregtechceu.gtceu.api.sync_system.annotations.SyncToClient;
 
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.Tag;
-import net.minecraft.server.TickTask;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.BlockHitResult;
 
-import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
-import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
-import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
-import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
+import brachy.modularui.factory.PosGuiData;
+import brachy.modularui.screen.UISettings;
+import brachy.modularui.value.sync.PanelSyncManager;
+import brachy.modularui.widget.ParentWidget;
 import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
+import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.trait.ExtendProxySlotRecipeHandler;
 
 import java.util.List;
 
@@ -36,33 +36,29 @@ import javax.annotation.ParametersAreNonnullByDefault;
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
 public class ExtendMEPatternBufferProxyPartMachine extends TieredIOPartMachine
-                                                   implements IMachineLife, IDataStickInteractable {
-
-    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(
-            ExtendMEPatternBufferProxyPartMachine.class, TieredIOPartMachine.MANAGED_FIELD_HOLDER);
+                                                   implements IMuiMachine, IDataStickInteractable {
 
     @Getter
     private final ExtendProxySlotRecipeHandler proxySlotRecipeHandler;
 
-    @Persisted
+    @SaveField
     @Getter
-    @DescSynced
+    @SyncToClient
     private @Nullable BlockPos bufferPos;
 
     private @Nullable ExtendMEPatternBufferPartMachine buffer = null;
     private boolean bufferResolved = false;
 
-    public ExtendMEPatternBufferProxyPartMachine(IMachineBlockEntity holder) {
-        super(holder, GTValues.LuV, IO.IN);
-        proxySlotRecipeHandler = new ExtendProxySlotRecipeHandler(this, ExtendMEPatternBufferPartMachine.MAX_PATTERN_COUNT);
+    public ExtendMEPatternBufferProxyPartMachine(BlockEntityCreationInfo info) {
+        super(info, GTValues.LuV, IO.IN);
+        proxySlotRecipeHandler = new ExtendProxySlotRecipeHandler(this,
+                ExtendMEPatternBufferPartMachine.MAX_PATTERN_COUNT);
     }
 
     @Override
     public void onLoad() {
         super.onLoad();
-        if (getLevel() instanceof ServerLevel level) {
-            level.getServer().tell(new TickTask(0, () -> this.setBuffer(bufferPos)));
-        }
+        if (!isRemote()) this.setBuffer(bufferPos);
     }
 
     @Override
@@ -83,6 +79,7 @@ public class ExtendMEPatternBufferProxyPartMachine extends TieredIOPartMachine
         } else {
             buffer = null;
         }
+        syncDataHolder.markClientSyncFieldDirty("bufferPos");
     }
 
     @Nullable
@@ -97,18 +94,21 @@ public class ExtendMEPatternBufferProxyPartMachine extends TieredIOPartMachine
     }
 
     @Override
-    public ModularUI createUI(Player entityPlayer) {
-        assert getBuffer() != null; // UI should never be able to be opened when buffer is null
-        return getBuffer().createUI(entityPlayer);
+    public MachineUIPanelBuilder getPanelBuilder(PosGuiData data, PanelSyncManager syncManager, UISettings settings) {
+        assert getBuffer() != null;
+        return getBuffer().getPanelBuilder(data, syncManager, settings);
     }
 
     @Override
-    public ManagedFieldHolder getFieldHolder() {
-        return MANAGED_FIELD_HOLDER;
+    public void buildMainUI(ParentWidget<?> mainWidget, PosGuiData guiData, PanelSyncManager syncManager,
+                            UISettings settings) {
+        assert getBuffer() != null;
+        getBuffer().buildMainUI(mainWidget, guiData, syncManager, settings);
     }
 
     @Override
-    public void onMachineRemoved() {
+    public void onMachineDestroyed() {
+        super.onMachineDestroyed();
         var buf = getBuffer();
         if (buf != null) {
             buf.removeProxy(this);

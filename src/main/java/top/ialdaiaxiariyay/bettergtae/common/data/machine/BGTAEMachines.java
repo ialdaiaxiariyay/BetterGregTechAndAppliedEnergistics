@@ -1,11 +1,5 @@
 package top.ialdaiaxiariyay.bettergtae.common.data.machine;
 
-import top.ialdaiaxiariyay.bettergtae.common.data.BGTAECreativeModeTabs;
-import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.CraftingPatternPartMachine;
-import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferPartMachine;
-import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferProxyPartMachine;
-import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.MEDualHatchPartMachine;
-
 import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.data.RotationState;
 import com.gregtechceu.gtceu.api.machine.MachineDefinition;
@@ -15,6 +9,12 @@ import com.gregtechceu.gtceu.common.machine.multiblock.part.CleaningMaintenanceH
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+
+import top.ialdaiaxiariyay.bettergtae.common.data.BGTAECreativeModeTabs;
+import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.CraftingPatternPartMachine;
+import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferPartMachine;
+import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferProxyPartMachine;
+import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.MEInputDualPartMachine;
 
 import static com.gregtechceu.gtceu.api.GTValues.*;
 import static top.ialdaiaxiariyay.bettergtae.api.registrate.BGTAERegistrate.REGISTRATE;
@@ -61,7 +61,7 @@ public class BGTAEMachines {
             .register();
 
     public static final MachineDefinition ME_STOCKING_DUAL_INPUT_HATCH = REGISTRATE
-            .machine("me_stocking_dual_input_hatch", MEDualHatchPartMachine::new)
+            .machine("me_stocking_dual_input_hatch", MEInputDualPartMachine::new)
             .tier(LuV)
             .rotationState(RotationState.ALL)
             .abilities(PartAbility.IMPORT_ITEMS, PartAbility.IMPORT_FLUIDS)
@@ -86,7 +86,8 @@ public class BGTAEMachines {
                     Component.translatable("gtceu.machine.maintenance_hatch_cleanroom_auto.tooltip.1"))
             .tooltipBuilder((stack, tooltips) -> {
                 tooltips.add(Component.literal("  ").append(Component
-                        .translatable(CleanroomType.STERILE_CLEANROOM.getTranslationKey()).withStyle(ChatFormatting.GREEN)));
+                        .translatable(CleanroomType.STERILE_CLEANROOM.getTranslationKey())
+                        .withStyle(ChatFormatting.GREEN)));
             })
             .overlayTieredHullModel(GTCEu.id("block/machine/part/cleaning_maintenance_hatch"))
             .tier(ZPM)

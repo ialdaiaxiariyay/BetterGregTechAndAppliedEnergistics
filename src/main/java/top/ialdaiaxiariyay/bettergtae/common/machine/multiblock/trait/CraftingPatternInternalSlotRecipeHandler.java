@@ -1,9 +1,7 @@
 package top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.trait;
 
-import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.CraftingPatternPartMachine;
-import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.CraftingPatternPartMachine.InternalSlot;
-
 import com.gregtechceu.gtceu.api.capability.recipe.*;
+import com.gregtechceu.gtceu.api.machine.trait.MachineTraitType;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableRecipeHandlerTrait;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerGroupDistinctness;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
@@ -16,16 +14,19 @@ import net.minecraftforge.fluids.FluidStack;
 
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
+import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.CraftingPatternPartMachine;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public final class CraftingPatternInternalSlotRecipeHandler {
 
     @Getter
     private final List<RecipeHandlerList> slotHandlers;
 
-    public CraftingPatternInternalSlotRecipeHandler(CraftingPatternPartMachine buffer, InternalSlot[] slots) {
+    public CraftingPatternInternalSlotRecipeHandler(CraftingPatternPartMachine buffer,
+                                                    CraftingPatternPartMachine.InternalSlot[] slots) {
         this.slotHandlers = new ArrayList<>(slots.length);
         for (int i = 0; i < slots.length; i++) {
             var rhl = new SlotRHL(buffer, slots[i], i);
@@ -39,11 +40,12 @@ public final class CraftingPatternInternalSlotRecipeHandler {
         private final SlotItemRecipeHandler itemRecipeHandler;
         private final SlotFluidRecipeHandler fluidRecipeHandler;
 
-        public SlotRHL(CraftingPatternPartMachine buffer, InternalSlot slot, int idx) {
+        public SlotRHL(CraftingPatternPartMachine buffer, CraftingPatternPartMachine.InternalSlot slot, int idx) {
             super(IO.IN);
-            itemRecipeHandler = new SlotItemRecipeHandler(buffer, slot, idx);
-            fluidRecipeHandler = new SlotFluidRecipeHandler(buffer, slot, idx);
-            addHandlers(itemRecipeHandler, fluidRecipeHandler);
+            itemRecipeHandler = buffer.attachTrait(new SlotItemRecipeHandler(slot, idx));
+            fluidRecipeHandler = buffer.attachTrait(new SlotFluidRecipeHandler(slot, idx));
+            addHandlers(buffer.getCircuitInventory(), buffer.getShareInventory(), buffer.getShareTank(),
+                    itemRecipeHandler, fluidRecipeHandler);
             this.setGroup(RecipeHandlerGroupDistinctness.BUS_DISTINCT);
         }
 
@@ -59,7 +61,15 @@ public final class CraftingPatternInternalSlotRecipeHandler {
     @Getter
     private static class SlotItemRecipeHandler extends NotifiableRecipeHandlerTrait<Ingredient> {
 
-        private final InternalSlot slot;
+        public static final MachineTraitType<SlotItemRecipeHandler> TYPE = new MachineTraitType<>(
+                SlotItemRecipeHandler.class);
+
+        @Override
+        public @NotNull MachineTraitType<SlotItemRecipeHandler> getTraitType() {
+            return TYPE;
+        }
+
+        private final CraftingPatternPartMachine.InternalSlot slot;
         private final int priority;
 
         private final int size = 81;
@@ -67,15 +77,16 @@ public final class CraftingPatternInternalSlotRecipeHandler {
         private final IO handlerIO = IO.IN;
         private final boolean isDistinct = true;
 
-        private SlotItemRecipeHandler(CraftingPatternPartMachine buffer, InternalSlot slot, int index) {
-            super(buffer);
+        private SlotItemRecipeHandler(CraftingPatternPartMachine.InternalSlot slot, int index) {
+            super();
             this.slot = slot;
             this.priority = IFilteredHandler.HIGH + index + 1;
             slot.setOnContentsChanged(this::notifyListeners);
         }
 
         @Override
-        public List<Ingredient> handleRecipeInner(IO io, GTRecipe recipe, List<Ingredient> left, boolean simulate) {
+        public @NotNull List<Ingredient> handleRecipeInner(IO io, GTRecipe recipe, List<Ingredient> left,
+                                                           boolean simulate) {
             if (io != IO.IN || slot.isItemEmpty()) return left;
             return slot.handleItemInternal(left, simulate);
         }
@@ -94,7 +105,15 @@ public final class CraftingPatternInternalSlotRecipeHandler {
     @Getter
     private static class SlotFluidRecipeHandler extends NotifiableRecipeHandlerTrait<FluidIngredient> {
 
-        private final InternalSlot slot;
+        public static final MachineTraitType<SlotFluidRecipeHandler> TYPE = new MachineTraitType<>(
+                SlotFluidRecipeHandler.class);
+
+        @Override
+        public @NotNull MachineTraitType<SlotFluidRecipeHandler> getTraitType() {
+            return TYPE;
+        }
+
+        private final CraftingPatternPartMachine.InternalSlot slot;
         private final int priority;
 
         private final int size = 81;
@@ -102,18 +121,18 @@ public final class CraftingPatternInternalSlotRecipeHandler {
         private final IO handlerIO = IO.IN;
         private final boolean isDistinct = true;
 
-        private SlotFluidRecipeHandler(CraftingPatternPartMachine buffer, InternalSlot slot, int index) {
-            super(buffer);
+        private SlotFluidRecipeHandler(CraftingPatternPartMachine.InternalSlot slot, int index) {
+            super();
             this.slot = slot;
             this.priority = IFilteredHandler.HIGH + index + 1;
             slot.setOnContentsChanged(this::notifyListeners);
         }
 
         @Override
-        public List<FluidIngredient> handleRecipeInner(IO io, GTRecipe recipe, List<FluidIngredient> left,
-                                                       boolean simulate) {
+        public @NotNull List<FluidIngredient> handleRecipeInner(IO io, GTRecipe recipe, List<FluidIngredient> left,
+                                                                boolean simulate) {
             if (io != IO.IN || slot.isFluidEmpty()) return left;
-            return slot.handleFluidInternal(left, simulate);
+            return Objects.requireNonNull(slot.handleFluidInternal(left, simulate));
         }
 
         @Override

@@ -1,8 +1,5 @@
 package top.ialdaiaxiariyay.bettergtae.common.data;
 
-import top.ialdaiaxiariyay.bettergtae.common.block.BGTAECraftingUnitBlock;
-import top.ialdaiaxiariyay.bettergtae.common.block.BGTAECraftingUnitType;
-
 import com.gregtechceu.gtceu.common.data.models.GTModels;
 
 import net.minecraft.client.renderer.RenderType;
@@ -22,6 +19,9 @@ import appeng.blockentity.crafting.CraftingBlockEntity;
 import com.tterrag.registrate.util.entry.BlockEntityEntry;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import org.jetbrains.annotations.NotNull;
+import top.ialdaiaxiariyay.bettergtae.common.block.BGTAECraftingUnitBlock;
+import top.ialdaiaxiariyay.bettergtae.common.block.BGTAECraftingUnitType;
+import top.ialdaiaxiariyay.bettergtae.common.block.TierBlockRegistry;
 
 import java.util.List;
 import java.util.Map;
@@ -47,12 +47,17 @@ public class BGTAEBlocks {
      * {@code createTierBlock(name,texture,Name,1)}
      * </p>
      */
-
-    public static BlockEntry<? extends Block> createTierBlock(String name, ResourceLocation texture, Map<Integer, Supplier<? extends Block>> map, int tier) {
-        var Block = REGISTRATE.block(name, p -> new Block(p) {
+    public static BlockEntry<? extends Block> createTierBlock(
+                                                              String name,
+                                                              ResourceLocation texture,
+                                                              Map<Integer, Supplier<? extends Block>> map,
+                                                              String tierType,    // 新增
+                                                              int tier) {
+        var blockEntry = REGISTRATE.block(name, p -> new Block(p) {
 
             @Override
-            public void appendHoverText(@NotNull ItemStack stack, @Nullable BlockGetter level, @NotNull List<Component> tooltip, @NotNull TooltipFlag flag) {
+            public void appendHoverText(@NotNull ItemStack stack, @Nullable BlockGetter level,
+                                        @NotNull List<Component> tooltip, @NotNull TooltipFlag flag) {
                 tooltip.add(Component.translatable("bettergtae.block.tier", tier));
             }
         })
@@ -63,9 +68,13 @@ public class BGTAEBlocks {
                 .item(BlockItem::new)
                 .build()
                 .register();
-        map.put(tier, Block);
-        REGISTRATE.setCreativeTab(Block, BGTAECreativeModeTabs.BLOCK);
-        return Block;
+
+        Block block = blockEntry.get();
+        map.put(tier, blockEntry);   // 保留原按等级索引
+        TierBlockRegistry.registerBlock(tierType, block, tier);  // 注册到分级表
+
+        REGISTRATE.setCreativeTab(blockEntry, BGTAECreativeModeTabs.BLOCK);
+        return blockEntry;
     }
 
     private static BlockEntry<BGTAECraftingUnitBlock> registerCraftingUnitBlock(int tier, BGTAECraftingUnitType Type) {
@@ -131,7 +140,8 @@ public class BGTAEBlocks {
             .onRegister(type -> {
                 for (BGTAECraftingUnitType BGTAECraftingUnitType : BGTAECraftingUnitType.values()) {
                     AEBaseBlockEntity.registerBlockEntityItem(type, BGTAECraftingUnitType.getItemFromType());
-                    BGTAECraftingUnitType.getDefinition().get().setBlockEntity(CraftingBlockEntity.class, type, null, null);
+                    BGTAECraftingUnitType.getDefinition().get().setBlockEntity(CraftingBlockEntity.class, type, null,
+                            null);
                 }
             })
             .register();

@@ -3,9 +3,9 @@ dependencies {
 
     //gtceu
     modImplementation(forge.gtceu)
-    modImplementation(forge.ldlib)
     modImplementation(forge.registrate)
     modImplementation(forge.configuration)
+    modImplementation(forge.mui)
 
     //Mixin
     annotationProcessor(variantOf(libs.mixin) { classifier("processor") })
@@ -25,6 +25,8 @@ dependencies {
     modImplementation(forge.bundles.kjs)
 
     modImplementation(forge.embeddium)
+
+    modImplementation(forge.curios)
 
     modRuntimeOnly(forge.jech)
 

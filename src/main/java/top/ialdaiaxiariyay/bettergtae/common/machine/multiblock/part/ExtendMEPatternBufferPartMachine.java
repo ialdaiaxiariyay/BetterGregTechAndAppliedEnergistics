@@ -1,30 +1,28 @@
 package top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part;
 
-import top.ialdaiaxiariyay.bettergtae.api.gui.MultiCircuitConfigurator;
-import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.trait.ExtendInternalSlotRecipeHandler;
-
+import brachy.modularui.widget.Widget;
+import com.gregtechceu.gtceu.api.blockentity.BlockEntityCreationInfo;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
-import com.gregtechceu.gtceu.api.gui.GuiTextures;
-import com.gregtechceu.gtceu.api.gui.fancy.ConfiguratorPanel;
-import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.MetaMachine;
 import com.gregtechceu.gtceu.api.machine.MultiblockMachineDefinition;
 import com.gregtechceu.gtceu.api.machine.TickableSubscription;
-import com.gregtechceu.gtceu.api.machine.fancyconfigurator.ButtonConfigurator;
-import com.gregtechceu.gtceu.api.machine.fancyconfigurator.FancyInvConfigurator;
-import com.gregtechceu.gtceu.api.machine.fancyconfigurator.FancyTankConfigurator;
 import com.gregtechceu.gtceu.api.machine.feature.IDataStickInteractable;
-import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiController;
+import com.gregtechceu.gtceu.api.machine.mui.MachineUIPanelBuilder;
+import com.gregtechceu.gtceu.api.machine.multiblock.MultiblockControllerMachine;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableFluidTank;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableItemStackHandler;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
 import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient;
 import com.gregtechceu.gtceu.api.recipe.ingredient.SizedIngredient;
+import com.gregtechceu.gtceu.api.sync_system.annotations.SaveField;
+import com.gregtechceu.gtceu.api.sync_system.annotations.SyncToClient;
 import com.gregtechceu.gtceu.api.transfer.item.CustomItemStackHandler;
 import com.gregtechceu.gtceu.common.data.machines.GTAEMachines;
-import com.gregtechceu.gtceu.common.item.IntCircuitBehaviour;
-import com.gregtechceu.gtceu.integration.ae2.gui.widget.AETextInputButtonWidget;
-import com.gregtechceu.gtceu.integration.ae2.gui.widget.slot.AEPatternViewSlotWidget;
+import com.gregtechceu.gtceu.common.item.behavior.IntCircuitBehaviour;
+import com.gregtechceu.gtceu.common.mui.GTGuiTextures;
+import com.gregtechceu.gtceu.common.mui.GTMuiMachineUtil;
+import com.gregtechceu.gtceu.common.mui.widgets.PopupPanel;
+import com.gregtechceu.gtceu.config.ConfigHolder;
 import com.gregtechceu.gtceu.integration.ae2.machine.MEBusPartMachine;
 import com.gregtechceu.gtceu.utils.GTMath;
 import com.gregtechceu.gtceu.utils.ItemStackHashStrategy;
@@ -35,15 +33,14 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.TickTask;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fluids.FluidStack;
 import net.minecraftforge.fluids.FluidType;
-import net.minecraftforge.items.ItemStackHandler;
 
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.crafting.PatternDetailsHelper;
@@ -58,29 +55,37 @@ import appeng.api.storage.StorageHelper;
 import appeng.crafting.pattern.EncodedPatternItem;
 import appeng.crafting.pattern.ProcessingPatternItem;
 import appeng.helpers.patternprovider.PatternContainer;
+import brachy.modularui.api.IPanelHandler;
+import brachy.modularui.api.drawable.Text;
+import brachy.modularui.drawable.DrawableStack;
+import brachy.modularui.drawable.DynamicDrawable;
+import brachy.modularui.drawable.ItemDrawable;
+import brachy.modularui.factory.PosGuiData;
+import brachy.modularui.screen.RichTooltip;
+import brachy.modularui.screen.UISettings;
+import brachy.modularui.value.sync.BooleanSyncValue;
+import brachy.modularui.value.sync.PanelSyncManager;
+import brachy.modularui.value.sync.SyncHandlers;
+import brachy.modularui.widget.ParentWidget;
+import brachy.modularui.widgets.ButtonWidget;
+import brachy.modularui.widgets.layout.Flow;
+import brachy.modularui.widgets.layout.Grid;
+import brachy.modularui.widgets.slot.ItemSlot;
+import brachy.modularui.widgets.slot.SlotGroup;
+import brachy.modularui.widgets.textfield.TextFieldWidget;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
-import com.lowdragmc.lowdraglib.gui.util.ClickData;
-import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
-import com.lowdragmc.lowdraglib.gui.widget.Widget;
-import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
-import com.lowdragmc.lowdraglib.syncdata.IContentChangeAware;
-import com.lowdragmc.lowdraglib.syncdata.ITagSerializable;
-import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
-import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
-import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
+import com.mojang.blaze3d.platform.InputConstants;
 import it.unimi.dsi.fastutil.objects.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
+import org.jetbrains.annotations.VisibleForTesting;
+import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.trait.ExtendInternalSlotRecipeHandler;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -89,8 +94,6 @@ import javax.annotation.ParametersAreNonnullByDefault;
 public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
                                               implements ICraftingProvider, PatternContainer, IDataStickInteractable {
 
-    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(
-            ExtendMEPatternBufferPartMachine.class, MEBusPartMachine.MANAGED_FIELD_HOLDER);
     protected static final int MAX_PATTERN_COUNT = 81;
     private final InternalInventory internalPatternInventory = new InternalInventory() {
 
@@ -113,33 +116,33 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
     };
 
     @Getter
-    @Persisted
-    @DescSynced // Maybe an Expansion Option in the future? a bit redundant for rn. Maybe Packdevs want to add their own
+    @SaveField
+    @SyncToClient
+    // Maybe an Expansion Option in the future? a bit redundant for rn. Maybe Packdevs want to add their own
     // version.
     private final CustomItemStackHandler patternInventory = new CustomItemStackHandler(MAX_PATTERN_COUNT);
 
     @Getter
-    @Persisted
+    @SaveField
     protected final NotifiableItemStackHandler shareInventory;
 
     @Getter
-    @Persisted
+    @SaveField
     protected final NotifiableFluidTank shareTank;
 
     @Getter
-    @Persisted
+    @SaveField
     protected final InternalSlot[] internalInventory = new InternalSlot[MAX_PATTERN_COUNT];
 
     private final BiMap<IPatternDetails, InternalSlot> detailsSlotMap = HashBiMap.create(MAX_PATTERN_COUNT);
 
-    @DescSynced
-    @Persisted
-    @Setter
+    @SyncToClient
+    @SaveField
     private String customName = "";
 
     private boolean needPatternSync;
 
-    @Persisted
+    @SaveField
     private final Set<BlockPos> proxies = new ObjectOpenHashSet<>();
     private final Set<ExtendMEPatternBufferProxyPartMachine> proxyMachines = new ReferenceOpenHashSet<>();
 
@@ -149,32 +152,53 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
     @Nullable
     protected TickableSubscription updateSubs;
 
-    public ExtendMEPatternBufferPartMachine(IMachineBlockEntity holder, Object... args) {
-        super(holder, IO.IN, args);
+    @SaveField
+    @SyncToClient
+    private int[] circuitConfigurations = new int[MAX_PATTERN_COUNT];
+
+    public ExtendMEPatternBufferPartMachine(BlockEntityCreationInfo info) {
+        super(info, IO.IN);
+        patternInventory.setOnContentsChanged(() -> getSyncDataHolder().markClientSyncFieldDirty("patternInventory"));
         this.patternInventory.setFilter(stack -> stack.getItem() instanceof ProcessingPatternItem);
+
         for (int i = 0; i < this.internalInventory.length; i++) {
-            this.internalInventory[i] = new InternalSlot(this);
+            NotifiableItemStackHandler circuitInv = attachTrait(
+                    new NotifiableItemStackHandler(1, IO.IN, IO.NONE) {
+                        @Override
+                        public void onContentsChanged() {
+                            super.onContentsChanged();
+                        }
+                    }
+            );
+            circuitInv.setFilter(IntCircuitBehaviour::isIntegratedCircuit);
+            InternalSlot slot = new InternalSlot(circuitInv);
+            circuitInv.storage.setOnContentsChanged(slot::onContentsChanged);
+            this.internalInventory[i] = slot;
         }
+
         getMainNode().addService(ICraftingProvider.class, this);
-        this.shareInventory = new NotifiableItemStackHandler(this, 16, IO.IN, IO.NONE);
-        this.shareTank = new NotifiableFluidTank(this, 16, 8 * FluidType.BUCKET_VOLUME, IO.IN, IO.NONE);
+        this.shareInventory = attachTrait(new NotifiableItemStackHandler(16, IO.IN, IO.NONE));
+        this.shareTank = attachTrait(new NotifiableFluidTank(16, 8 * FluidType.BUCKET_VOLUME, IO.IN, IO.NONE));
         this.internalRecipeHandler = new ExtendInternalSlotRecipeHandler(this, internalInventory);
+        Arrays.fill(circuitConfigurations, -1);
     }
 
     @Override
     public void onLoad() {
         super.onLoad();
-        if (getLevel() instanceof ServerLevel serverLevel) {
-            serverLevel.getServer().tell(new TickTask(1, () -> {
-                for (int i = 0; i < patternInventory.getSlots(); i++) {
-                    var pattern = patternInventory.getStackInSlot(i);
-                    var patternDetails = PatternDetailsHelper.decodePattern(pattern, getLevel());
-                    if (patternDetails != null) {
-                        this.detailsSlotMap.put(patternDetails, this.internalInventory[i]);
-                    }
+        if (!isRemote()) {
+            for (int i = 0; i < patternInventory.getSlots(); i++) {
+                var pattern = patternInventory.getStackInSlot(i);
+                var patternDetails = PatternDetailsHelper.decodePattern(pattern, getLevel());
+                if (patternDetails != null) {
+                    this.detailsSlotMap.put(patternDetails, this.internalInventory[i]);
                 }
-                needPatternSync = true;
-            }));
+            }
+            needPatternSync = true;
+            // 将电路配置同步到 InternalSlot 的 circuitInventory
+            for (int i = 0; i < circuitConfigurations.length; i++) {
+                setCircuitConfiguration(i, circuitConfigurations[i]);
+            }
         }
     }
 
@@ -186,6 +210,12 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
     @Override
     public boolean isWorkingEnabled() {
         return true;
+    }
+
+    public void setCustomName(String newName) {
+        customName = newName;
+        syncDataHolder.markClientSyncFieldDirty("customName");
+        markAsChanged();
     }
 
     @Override
@@ -222,12 +252,12 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
     }
 
     public void addProxy(ExtendMEPatternBufferProxyPartMachine proxy) {
-        proxies.add(proxy.getPos());
+        proxies.add(proxy.getBlockPos());
         proxyMachines.add(proxy);
     }
 
     public void removeProxy(ExtendMEPatternBufferProxyPartMachine proxy) {
-        proxies.remove(proxy.getPos());
+        proxies.remove(proxy.getBlockPos());
         proxyMachines.remove(proxy);
     }
 
@@ -244,15 +274,14 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
         return Collections.unmodifiableSet(proxyMachines);
     }
 
-    private void refundAll(ClickData clickData) {
-        if (!clickData.isRemote) {
-            for (InternalSlot internalSlot : internalInventory) {
-                internalSlot.refund();
-            }
+    private void refundAll() {
+        for (InternalSlot internalSlot : internalInventory) {
+            internalSlot.refund();
         }
     }
 
-    private void onPatternChange(int index) {
+    @VisibleForTesting
+    public void onPatternChange(int index) {
         if (isRemote()) return;
 
         // remove old if applicable
@@ -268,73 +297,345 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
         needPatternSync = true;
     }
 
+    public int getCircuitConfiguration(int slot) {
+        if (slot < 0 || slot >= circuitConfigurations.length) return -1;
+        return circuitConfigurations[slot];
+    }
+
+    public void setCircuitConfiguration(int slot, int value) {
+        if (slot < 0 || slot >= circuitConfigurations.length) return;
+        if (value < -1 || value > 32) return;
+        circuitConfigurations[slot] = value;
+        InternalSlot internalSlot = internalInventory[slot];
+        if (value >= 0) {
+            internalSlot.getCircuitInventory().setStackInSlot(0, IntCircuitBehaviour.stack(value));
+        } else {
+            internalSlot.getCircuitInventory().setStackInSlot(0, ItemStack.EMPTY);
+        }
+        syncDataHolder.markClientSyncFieldDirty("circuitConfigurations");
+        markAsChanged();
+    }
+
     //////////////////////////////////////
     // ********** GUI ***********//
     //////////////////////////////////////
+
     @Override
-    public void attachConfigurators(ConfiguratorPanel configuratorPanel) {
-        configuratorPanel.attachConfigurators(new ButtonConfigurator(
-                new GuiTextureGroup(GuiTextures.BUTTON, GuiTextures.REFUND_OVERLAY), this::refundAll)
-                .setTooltips(List.of(Component.translatable("gui.gtceu.refund_all.desc"))));
-        ItemStackHandler[] circuitHandlers = new ItemStackHandler[internalInventory.length];
-        for (int i = 0; i < internalInventory.length; i++) {
-            circuitHandlers[i] = internalInventory[i].getCircuitInventory().storage;
-        }
-        configuratorPanel.attachConfigurators(new MultiCircuitConfigurator(circuitHandlers, Component.translatable("bettergtae.gui.circuit_configurator_slot.title")));
-        configuratorPanel.attachConfigurators(new FancyInvConfigurator(
-                shareInventory.storage, Component.translatable("gui.gtceu.share_inventory.title"))
-                .setTooltips(List.of(
-                        Component.translatable("gui.gtceu.share_inventory.desc.0"),
-                        Component.translatable("gui.gtceu.share_inventory.desc.1"))));
-        configuratorPanel.attachConfigurators(new FancyTankConfigurator(
-                shareTank.getStorages(), Component.translatable("gui.gtceu.share_tank.title"))
-                .setTooltips(List.of(
-                        Component.translatable("gui.gtceu.share_tank.desc.0"),
-                        Component.translatable("gui.gtceu.share_inventory.desc.1"))));
+    public MachineUIPanelBuilder getPanelBuilder(PosGuiData data, PanelSyncManager syncManager, UISettings settings) {
+        // 保留主面板同步管理器引用，供后续闭包使用
+        final PanelSyncManager mainSyncManager = syncManager;
+
+        // ---- 重命名面板 ----
+        IPanelHandler renamingPanelHandler = syncManager.syncedPanel("renaming", true,
+                ((syncManager1, syncHandler) -> PopupPanel.createPopupPanel("renaming_panel", 110, 40)
+                        .child(Flow.col()
+                                .coverChildren()
+                                .child(Text.lang("gtceu.gui.pattern_buffer.set_custom_name").asWidget())
+                                .child(new TextFieldWidget()
+                                        .size(90, 20)
+                                        .value(SyncHandlers.string(() -> this.customName, this::setCustomName)))
+                                .margin(5))));
+
+        // ---- 共享物品面板 ----
+        IPanelHandler sharedItemsPanelHandler = syncManager.syncedPanel("shared_items", true,
+                (syncManager1, panelHandler) -> {
+                    SlotGroup sharedItemSlotGroup = new SlotGroup("shared_item_slots", 4, false);
+                    // 窗口宽度略大于 4 个 18px 格子（72）+ 边距，80 足够
+                    return PopupPanel.createPopupPanel("shared_items_panel", 80, 86)
+                            .child(Text.lang("gui.gtceu.share_inventory.title").asWidget().margin(4))
+                            .child(new Grid()
+                                    .name("shared_item_grid")
+                                    .top(26)
+                                    .height(18 * 4)                // 4 行
+                                    .minElementMargin(0, 0)
+                                    .minColWidth(18).minRowHeight(18)
+                                    .leftRel(0.5f)
+                                    .gridOfSizeWidth(16, 4, (x, y, index) -> new ItemSlot()   // 总共 16 格，4 列
+                                            .slot(SyncHandlers.itemSlot(shareInventory, index)
+                                                    .slotGroup(sharedItemSlotGroup)
+                                                    .accessibility(true, true))));
+                });
+        // ---- 共享流体面板 ----
+        IPanelHandler sharedFluidsPanelHandler = syncManager.syncedPanel("shared_fluids", true,
+                (syncManager1, panelHandler) -> PopupPanel.createPopupPanel("shared_fluids_panel", 85, 86)
+                        .child(Text.lang("gui.gtceu.share_tank.title").asWidget().margin(4))
+                        .child(GTMuiMachineUtil.createSlotGroupFromInventory(syncManager1, shareTank,
+                                        "shared_fluid_slots", 16, 'F',
+                                        GTMuiMachineUtil.createSquareMatrix(16, 'F'))   // 4x4 矩阵，共 16 格
+                                .top(26)
+                                .leftRel(0.5f)));
+
+        // ---- 电路配置数值选择器面板（右键弹出） ----
+        // 用 IntSyncValue 存储当前正在编辑的槽位号
+        final AtomicInteger selectedCircuitSlot = new AtomicInteger(-1);
+
+        final IPanelHandler circuitPickerHandler = mainSyncManager.syncedPanel("circuit_picker", true,
+                (syncManager1, panelHandler) -> {
+                    int slotIndex = selectedCircuitSlot.get();
+                    if (slotIndex < 0 || slotIndex >= MAX_PATTERN_COUNT) {
+                        return PopupPanel.createPopupPanel("circuit_picker_empty", 0, 0);
+                    }
+
+                    PopupPanel popup = PopupPanel.createPopupPanel("circuit_picker_panel", 170, 130);
+                    popup.closeOnOutOfBoundsClick(true);
+
+                    popup.child(Text.lang("bettergtae.gui.circuit.picker.title", slotIndex + 1)
+                            .asWidget().posRel(0.5f, 0.05f).size(160, 16));
+                    popup.child(Text.dynamic(() -> Component.translatable("bettergtae.gui.circuit.current_value",
+                                    getCircuitConfiguration(slotIndex)))
+                            .asWidget().posRel(0.5f, 0.12f).size(160, 12));
+
+                    // 数字网格（0~32）
+                    Grid grid = new Grid()
+                            .minElementMargin(0, 0)
+                            .minColWidth(18).minRowHeight(18)
+                            .coverChildren()
+                            .leftRel(0.5f)
+                            .topRel(0.25f)
+                            .gridOfWidthHeight(4, 9, (row, col, index) -> {
+                                int value = row * 9 + col;
+                                if (value > 32) return new Widget<>().size(18, 18);
+                                return (ButtonWidget<?>) new ButtonWidget<>()
+                                        .size(18, 18)
+                                        .background(new ItemDrawable(IntCircuitBehaviour.stack(value)).asIcon())
+                                        .onMousePressed((c, b) -> {
+                                            setCircuitConfiguration(slotIndex, value);
+                                            mainSyncManager.callSyncedAction("setCircuitConfig", buf -> {
+                                                buf.writeVarInt(slotIndex);
+                                                buf.writeVarInt(value);
+                                            });
+                                            panelHandler.closePanel();
+                                            return true;
+                                        })
+                                        .tooltip(new RichTooltip().add(Component.literal(String.valueOf(value))));
+                            });
+
+                    popup.child(grid);
+
+                    // 清除按钮
+                    ButtonWidget<?> clearBtn = new ButtonWidget<>()
+                            .size(40, 16)
+                            .posRel(0.5f, 0.85f)
+                            .background(GTGuiTextures.BUTTON)
+                            .overlay(Text.lang("bettergtae.gui.circuit.clear").asIcon())
+                            .onMousePressed((c, b) -> {
+                                setCircuitConfiguration(slotIndex, -1);
+                                mainSyncManager.callSyncedAction("setCircuitConfig", buf -> {
+                                    buf.writeVarInt(slotIndex);
+                                    buf.writeVarInt(-1);
+                                });
+                                panelHandler.closePanel();
+                                return true;
+                            });
+                    popup.child(clearBtn);
+
+                    return popup;
+                });
+
+        // ---- 电路配置总览面板（左侧按钮打开） ----
+        IPanelHandler circuitPanelHandler = syncManager.syncedPanel("circuit_config", true,
+                (syncManager1, panelHandler) -> {
+                    PopupPanel popup = PopupPanel.createPopupPanel("circuit_config_panel", 174, 185);
+                    popup.closeOnOutOfBoundsClick(true);
+                    popup.child(Text.lang("bettergtae.gui.circuit.configurator.title")
+                            .asWidget().posRel(0.5f, 0.04f).size(160, 16));
+
+                    Grid grid = new Grid()
+                            .height(18 * ((int) Math.ceil((double) MAX_PATTERN_COUNT / 9)))
+                            .minElementMargin(0, 0)
+                            .minColWidth(18).minRowHeight(18)
+                            .leftRel(0.5f)
+                            .gridOfSizeWidth(MAX_PATTERN_COUNT, 9, (x, y, index) -> {
+                                if (index >= MAX_PATTERN_COUNT) return new Widget<>().size(18, 18);
+                                return createCircuitButton(index, mainSyncManager, selectedCircuitSlot, circuitPickerHandler);
+                            });
+
+                    popup.child(grid.topRel(0.2f));
+                    return popup;
+                });
+
+        // ---- 退款 / 状态等同步值 ----
+        BooleanSyncValue canRefundValue = SyncHandlers.bool(this::canRefund, b -> {});
+        syncManager.syncValue("can_refund", canRefundValue);
+
+        // ---- 注册动作 ----
+        syncManager.registerServerSyncedAction("refundButtonPressed", packet -> refundAll());
+        syncManager.registerServerSyncedAction("setCircuitConfig", packet -> {
+            int slot = packet.readVarInt();
+            int value = packet.readVarInt();
+            setCircuitConfiguration(slot, value); // 内部会同步更新 circuitInventory
+        });
+
+        // ---- 左侧配置按钮区域 ----
+        return MachineUIPanelBuilder.panelBuilder(this).leftConfigurators(f -> f
+                .child(new ButtonWidget<>()
+                        .size(18)
+                        .onMousePressed((context, b) -> {
+                            if (b == InputConstants.MOUSE_BUTTON_LEFT) {
+                                sharedItemsPanelHandler.openPanel();
+                                return true;
+                            }
+                            return false;
+                        })
+                        .overlay(GTGuiTextures.BUTTON_ITEM_OUTPUT)
+                        .tooltip(new RichTooltip()
+                                .addLine(Text.lang("gui.gtceu.share_inventory.desc.0"))
+                                .addLine(Text.lang("gui.gtceu.share_inventory.desc.1"))))
+                .child(new ButtonWidget<>()
+                        .size(18)
+                        .onMousePressed((context, b) -> {
+                            if (b == InputConstants.MOUSE_BUTTON_LEFT) {
+                                sharedFluidsPanelHandler.openPanel();
+                                return true;
+                            }
+                            return false;
+                        })
+                        .overlay(GTGuiTextures.BUTTON_FLUID_OUTPUT)
+                        .tooltip(new RichTooltip()
+                                .addLine(Text.lang("gui.gtceu.share_tank.desc.0"))
+                                .addLine(Text.lang("gui.gtceu.share_inventory.desc.1"))))
+                .child(new ButtonWidget<>()
+                        .size(18)
+                        .onMousePressed((context, b) -> {
+                            if (canRefundValue.getBoolValue() && b == InputConstants.MOUSE_BUTTON_LEFT) {
+                                syncManager.callSyncedAction("refundButtonPressed");
+                                return true;
+                            }
+                            return false;
+                        })
+                        .overlay(new DynamicDrawable(() -> canRefundValue.getBoolValue()
+                                ? GTGuiTextures.REFUND_OVERLAY.asIcon().size(16)
+                                : new DrawableStack(GTGuiTextures.REFUND_OVERLAY, new ItemDrawable(Items.BARRIER))
+                                .asIcon().size(16)))
+                        .tooltip(new RichTooltip().addLine(Text.lang("gui.gtceu.refund_all.desc"))))
+                .child(new ButtonWidget<>()
+                        .size(18)
+                        .onMousePressed((context, b) -> {
+                            if (b == InputConstants.MOUSE_BUTTON_LEFT) {
+                                renamingPanelHandler.openPanel();
+                                return true;
+                            }
+                            return false;
+                        })
+                        .overlay(Text.str("✎").asIcon().size(16))
+                        .tooltip(new RichTooltip().addLine(Text.lang("gui.gtceu.rename.desc"))))
+                .child(new ButtonWidget<>()
+                        .size(18)
+                        .onMousePressed((context, b) -> {
+                            if (b == InputConstants.MOUSE_BUTTON_LEFT) {
+                                circuitPanelHandler.openPanel();
+                                return true;
+                            }
+                            return false;
+                        })
+                        .overlay(GTGuiTextures.INT_CIRCUIT_OVERLAY.asIcon().size(16))
+                        .tooltip(new RichTooltip().add(Component.translatable("bettergtae.gui.circuit.configurator.tooltip")))));
     }
 
+
     @Override
-    public Widget createUIWidget() {
-        int rowSize = 9;
-        int colSize = 9;
-        var group = new WidgetGroup(0, 0, 18 * rowSize + 16, 18 * colSize + 16);
-        int index = 0;
-        for (int y = 0; y < colSize; ++y) {
-            for (int x = 0; x < rowSize; ++x) {
-                int finalI = index;
-                var slot = new AEPatternViewSlotWidget(patternInventory, index++, 8 + x * 18, 14 + y * 18)
-                        .setOccupiedTexture(GuiTextures.SLOT)
-                        .setItemHook(stack -> {
-                            if (!stack.isEmpty() && stack.getItem() instanceof EncodedPatternItem iep) {
-                                final ItemStack out = iep.getOutput(stack);
-                                if (!out.isEmpty()) {
-                                    return out;
-                                }
-                            }
-                            return stack;
-                        })
-                        .setChangeListener(() -> onPatternChange(finalI))
-                        .setBackground(GuiTextures.SLOT, GuiTextures.PATTERN_OVERLAY);
-                group.addWidget(slot);
-            }
-        }
-        // ME Network status
-        group.addWidget(new LabelWidget(
-                8,
-                2,
-                () -> this.isOnline ? "gtceu.gui.me_network.online" : "gtceu.gui.me_network.offline"));
+    public void buildMainUI(ParentWidget<?> mainWidget, PosGuiData guiData, PanelSyncManager syncManager,
+                            UISettings settings) {
+        SlotGroup patternSlotGroup = new SlotGroup("pattern_slots", 9, 0, true);
 
-        group.addWidget(new AETextInputButtonWidget(18 * rowSize + 8 - 70, 2, 70, 10)
-                .setText(customName)
-                .setOnConfirm(this::setCustomName)
-                .setButtonTooltips(Component.translatable("gui.gtceu.rename.desc")));
+        BooleanSyncValue isOnlineValue = new BooleanSyncValue(this::isOnline, this::setOnline);
+        syncManager.syncValue("is_online", isOnlineValue);
 
-        return group;
+        var flow = Flow.col().coverChildren();
+
+        flow.child(Text.dynamic(() -> isOnlineValue.getBoolValue() ?
+                Component.translatable("gtceu.gui.me_network.online") :
+                Component.translatable("gtceu.gui.me_network.offline"))
+                .asWidget().marginTop(2).marginBottom(4));
+
+        flow.child(new Grid()
+                .height(18 * (MAX_PATTERN_COUNT / 9))
+                .minElementMargin(0, 0)
+                .minColWidth(18).minRowHeight(18)
+                .leftRel(0.5f)
+                .gridOfSizeWidth(MAX_PATTERN_COUNT, 9, (x, y, index) -> new ItemSlot()
+                        .slot(SyncHandlers.itemSlot(patternInventory, index)
+                                .slotGroup(patternSlotGroup)
+                                .accessibility(true, true)
+                                .filter(stack -> stack.getItem() instanceof EncodedPatternItem)
+                                .changeListener((i, o, c, init) -> onPatternChange(index)))
+                        .background(GTGuiTextures.SLOT, GTGuiTextures.PATTERN_OVERLAY)));
+
+        mainWidget.child(flow.center());
+    }
+
+    private Widget<?> createCircuitButton(int slotIndex, PanelSyncManager mainSyncManager,
+                                          AtomicInteger selectedCircuitSlot, IPanelHandler circuitPickerHandler) {
+        DynamicDrawable display = new DynamicDrawable(() -> {
+            int val = getCircuitConfiguration(slotIndex);
+            String text = val == -1 ? "-" : String.valueOf(val);
+            return Text.str(text).asIcon().size(16);
+        });
+
+        // 左键
+        // 中键
+        // 右键：打开数值选择器
+        return new ButtonWidget<>()
+                .size(18, 18)
+                .background(GTGuiTextures.SLOT)
+                .overlay(display)
+                .onMousePressed((context, btn) -> {
+                    int cur = getCircuitConfiguration(slotIndex);
+                    int newVal;
+                    if (btn == 0) { // 左键
+                        if (cur == -1) newVal = 0;
+                        else {
+                            newVal = (cur + 1) % 33;
+                            if (newVal == 0 && !ConfigHolder.INSTANCE.machines.ghostCircuit) newVal = -1;
+                        }
+                        sendCircuitSync(slotIndex, newVal, mainSyncManager);
+                    } else if (btn == 1) { // 中键
+                        newVal = ConfigHolder.INSTANCE.machines.ghostCircuit ? -1 : 0;
+                        sendCircuitSync(slotIndex, newVal, mainSyncManager);
+                    } else if (btn == 2) { // 右键：打开数值选择器
+                        selectedCircuitSlot.set(slotIndex);
+                        circuitPickerHandler.openPanel();
+                    }
+                    return true;
+                })
+                .onMouseScrolled((context, delta) -> {
+                    int cur = getCircuitConfiguration(slotIndex);
+                    int newVal;
+                    if (delta > 0) {
+                        if (cur == -1) newVal = 0;
+                        else {
+                            newVal = (cur + 1) % 33;
+                            if (newVal == 0 && !ConfigHolder.INSTANCE.machines.ghostCircuit) newVal = -1;
+                        }
+                    } else {
+                        if (cur == -1) {
+                            newVal = ConfigHolder.INSTANCE.machines.ghostCircuit ? -1 : 32;
+                        } else {
+                            newVal = cur - 1;
+                            if (newVal < 0) newVal = ConfigHolder.INSTANCE.machines.ghostCircuit ? -1 : 32;
+                        }
+                    }
+                    sendCircuitSync(slotIndex, newVal, mainSyncManager);
+                    return true;
+                })
+                .tooltip(new RichTooltip()
+                        .add(Component.translatable("bettergtae.gui.circuit.slot_tooltip", slotIndex + 1)));
+    }
+
+    private void sendCircuitSync(int slot, int value, PanelSyncManager syncManager) {
+        syncManager.callSyncedAction("setCircuitConfig", buf -> {
+            buf.writeVarInt(slot);
+            buf.writeVarInt(value);
+        });
+    }
+
+    public boolean canRefund() {
+        return Arrays.stream(internalInventory).anyMatch(slot -> !slot.isEmpty());
     }
 
     @Override
     public List<IPatternDetails> getAvailablePatterns() {
-        return detailsSlotMap.keySet().stream().filter(Objects::nonNull).toList();
+        return detailsSlotMap.keySet().stream().toList();
     }
 
     @Override
@@ -369,11 +670,6 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
     }
 
     @Override
-    public ManagedFieldHolder getFieldHolder() {
-        return MANAGED_FIELD_HOLDER;
-    }
-
-    @Override
     public @Nullable IGrid getGrid() {
         return getMainNode().getGrid();
     }
@@ -387,8 +683,8 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
     public PatternContainerGroup getTerminalGroup() {
         // Has controller
         if (isFormed()) {
-            IMultiController controller = getControllers().first();
-            MultiblockMachineDefinition controllerDefinition = controller.self().getDefinition();
+            MultiblockControllerMachine controller = getControllers().first();
+            MultiblockMachineDefinition controllerDefinition = controller.getDefinition();
             // has customName
             if (!customName.isEmpty()) {
                 return new PatternContainerGroup(
@@ -425,14 +721,15 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
     }
 
     @Override
-    public void onMachineRemoved() {
-        clearInventory(patternInventory);
-        clearInventory(shareInventory);
+    public void onMachineDestroyed() {
+        patternInventory.dropInventoryInWorld(getLevel(), getBlockPos());
+        shareInventory.dropInventoryInWorld();
     }
 
     @Override
     public InteractionResult onDataStickShiftUse(Player player, ItemStack dataStick) {
-        dataStick.getOrCreateTag().putIntArray("pos", new int[] { getPos().getX(), getPos().getY(), getPos().getZ() });
+        dataStick.getOrCreateTag().putIntArray("pos",
+                new int[] { getBlockPos().getX(), getBlockPos().getY(), getBlockPos().getZ() });
         return InteractionResult.SUCCESS;
     }
 
@@ -448,7 +745,7 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
         return new BufferData(items, fluids);
     }
 
-    public class InternalSlot implements ITagSerializable<CompoundTag>, IContentChangeAware {
+    public class InternalSlot implements INBTSerializable<CompoundTag> {
 
         @Getter
         @Setter
@@ -457,20 +754,17 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
         private final Object2LongOpenCustomHashMap<ItemStack> itemInventory = new Object2LongOpenCustomHashMap<>(
                 ItemStackHashStrategy.comparingAllButCount());
         private final Object2LongOpenHashMap<FluidStack> fluidInventory = new Object2LongOpenHashMap<>();
-        private List<ItemStack> itemStacks = null;
-        private List<FluidStack> fluidStacks = null;
+        private @Nullable List<ItemStack> itemStacks = null;
+        private @Nullable List<FluidStack> fluidStacks = null;
         @Getter
         private final NotifiableItemStackHandler circuitInventory;
 
-        public InternalSlot(ExtendMEPatternBufferPartMachine machine) {
-            this.circuitInventory = new NotifiableItemStackHandler(machine, 1, IO.IN, IO.NONE) {
-
-                @Override
-                public void onContentsChanged() {
-                    InternalSlot.this.onContentsChanged();
-                }
-            };
+        public InternalSlot(NotifiableItemStackHandler circuitInventory) {
+            this.circuitInventory = circuitInventory;
             this.circuitInventory.setFilter(IntCircuitBehaviour::isIntegratedCircuit);
+            this.circuitInventory.storage.setOnContentsChanged(() -> {
+                InternalSlot.this.onContentsChanged();
+            });
         }
 
         public boolean isItemEmpty() {
@@ -479,6 +773,10 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
 
         public boolean isFluidEmpty() {
             return fluidInventory.isEmpty();
+        }
+
+        public boolean isEmpty() {
+            return isItemEmpty() && isFluidEmpty();
         }
 
         public void onContentsChanged() {
@@ -572,7 +870,7 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
             onContentsChanged();
         }
 
-        public @Nullable List<Ingredient> handleItemInternal(List<Ingredient> left, boolean simulate) {
+        public List<Ingredient> handleItemInternal(List<Ingredient> left, boolean simulate) {
             boolean changed = false;
             for (var it = left.listIterator(); it.hasNext();) {
                 var ingredient = it.next();
@@ -621,10 +919,10 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
                 }
             }
             if (changed) onContentsChanged();
-            return left.isEmpty() ? null : left;
+            return left;
         }
 
-        public @Nullable List<FluidIngredient> handleFluidInternal(List<FluidIngredient> left, boolean simulate) {
+        public List<FluidIngredient> handleFluidInternal(List<FluidIngredient> left, boolean simulate) {
             boolean changed = false;
             for (var it = left.listIterator(); it.hasNext();) {
                 var ingredient = it.next();
@@ -670,7 +968,7 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
             }
 
             if (changed) onContentsChanged();
-            return left.isEmpty() ? null : left;
+            return left;
         }
 
         @Override
@@ -693,10 +991,10 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
             }
             if (!fluidsTag.isEmpty()) tag.put("fluidInventory", fluidsTag);
 
-            if (circuitInventory != null && circuitInventory.storage != null) {
+            if (circuitInventory != null) {
                 tag.put("circuitInventory", circuitInventory.storage.serializeNBT());
             }
-
+            
             return tag;
         }
 
@@ -722,9 +1020,7 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
                 }
             }
 
-            if (tag.contains("circuitInventory") &&
-                    circuitInventory != null &&
-                    circuitInventory.storage != null) {
+            if (tag.contains("circuitInventory") && circuitInventory != null) {
                 circuitInventory.storage.deserializeNBT(tag.getCompound("circuitInventory"));
             }
         }

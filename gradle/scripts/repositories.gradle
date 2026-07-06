@@ -6,10 +6,12 @@ repositories {
         maven {
             name = 'GTCEu Maven'
             url = 'https://maven.gtceu.com'
-            content {
-                includeGroup 'com.gregtechceu.gtceu'
-            }
         }
+    }
+
+    maven {
+        name 'Configuration'
+        url = "https://repo.repsy.io/mvn/toma/public/"
     }
 
     maven { // LDLib
@@ -74,4 +76,10 @@ repositories {
             includeGroup("com.tterrag.registrate")
         }
     }
+
+    maven {
+        name = "Curios"
+        url = uri("https://maven.theillusivec4.top/")
+    }
+
 }

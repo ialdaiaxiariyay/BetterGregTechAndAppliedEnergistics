@@ -1,22 +1,18 @@
 package top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.trait;
 
-import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferPartMachine;
-import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferProxyPartMachine;
-
 import com.gregtechceu.gtceu.api.capability.recipe.*;
-import com.gregtechceu.gtceu.api.machine.MetaMachine;
-import com.gregtechceu.gtceu.api.machine.trait.IRecipeHandlerTrait;
-import com.gregtechceu.gtceu.api.machine.trait.NotifiableRecipeHandlerTrait;
-import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerGroupDistinctness;
-import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
+import com.gregtechceu.gtceu.api.machine.trait.*;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient;
+import com.gregtechceu.gtceu.utils.ISubscription;
 
 import net.minecraft.world.item.crafting.Ingredient;
 
-import com.lowdragmc.lowdraglib.syncdata.ISubscription;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferPartMachine;
+import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferProxyPartMachine;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,19 +23,20 @@ public final class ExtendProxySlotRecipeHandler {
     @Getter
     private final List<RecipeHandlerList> proxySlotHandlers;
 
-    public ExtendProxySlotRecipeHandler(ExtendMEPatternBufferProxyPartMachine machine, int slots) {
+    public ExtendProxySlotRecipeHandler(ExtendMEPatternBufferProxyPartMachine proxyMachine, int slots) {
         proxySlotHandlers = new ArrayList<>(slots);
         for (int i = 0; i < slots; ++i) {
-            proxySlotHandlers.add(new ProxyRHL(machine));
+            proxySlotHandlers.add(new ProxyRHL(proxyMachine));
         }
     }
 
     public void updateProxy(ExtendMEPatternBufferPartMachine patternBuffer) {
         var slotHandlers = patternBuffer.getInternalRecipeHandler().getSlotHandlers();
+        var internalSlots = patternBuffer.getInternalInventory(); // 需新增 getter
         for (int i = 0; i < proxySlotHandlers.size(); ++i) {
             ProxyRHL proxyRHL = (ProxyRHL) proxySlotHandlers.get(i);
             ExtendInternalSlotRecipeHandler.SlotRHL slotRHL = (ExtendInternalSlotRecipeHandler.SlotRHL) slotHandlers.get(i);
-            proxyRHL.setBuffer(patternBuffer, slotRHL);
+            proxyRHL.setBuffer(patternBuffer, slotRHL, internalSlots[i]);
         }
     }
 
@@ -57,18 +54,19 @@ public final class ExtendProxySlotRecipeHandler {
         private final ProxyFluidRecipeHandler sharedFluid;
         private final ProxyFluidRecipeHandler slotFluid;
 
-        public ProxyRHL(ExtendMEPatternBufferProxyPartMachine machine) {
+        public ProxyRHL(ExtendMEPatternBufferProxyPartMachine proxyMachine) {
             super(IO.IN);
-            circuit = new ProxyItemRecipeHandler(machine);
-            sharedItem = new ProxyItemRecipeHandler(machine);
-            slotItem = new ProxyItemRecipeHandler(machine);
-            sharedFluid = new ProxyFluidRecipeHandler(machine);
-            slotFluid = new ProxyFluidRecipeHandler(machine);
+            circuit = proxyMachine.attachTrait(new ProxyItemRecipeHandler());
+            sharedItem = proxyMachine.attachTrait(new ProxyItemRecipeHandler());
+            slotItem = proxyMachine.attachTrait(new ProxyItemRecipeHandler());
+            sharedFluid = proxyMachine.attachTrait(new ProxyFluidRecipeHandler());
+            slotFluid = proxyMachine.attachTrait(new ProxyFluidRecipeHandler());
             addHandlers(circuit, sharedItem, slotItem, sharedFluid, slotFluid);
             this.setGroup(RecipeHandlerGroupDistinctness.BUS_DISTINCT);
         }
 
-        public void setBuffer(ExtendMEPatternBufferPartMachine buffer, ExtendInternalSlotRecipeHandler.SlotRHL slotRHL) {
+        public void setBuffer(ExtendMEPatternBufferPartMachine buffer,
+                              ExtendInternalSlotRecipeHandler.SlotRHL slotRHL, ExtendMEPatternBufferPartMachine.InternalSlot internalSlot) {
             circuit.setProxy(buffer.getCircuitInventory());
             sharedItem.setProxy(buffer.getShareInventory());
             sharedFluid.setProxy(buffer.getShareTank());
@@ -96,18 +94,26 @@ public final class ExtendProxySlotRecipeHandler {
     @Getter
     private static class ProxyItemRecipeHandler extends NotifiableRecipeHandlerTrait<Ingredient> {
 
-        private IRecipeHandlerTrait<Ingredient> proxy = null;
-        private ISubscription proxySub = null;
+        public static final MachineTraitType<ProxyItemRecipeHandler> TYPE = new MachineTraitType<>(
+                ProxyItemRecipeHandler.class);
+
+        @Override
+        public MachineTraitType<ProxyItemRecipeHandler> getTraitType() {
+            return TYPE;
+        }
+
+        private @Nullable IRecipeHandlerTrait<Ingredient> proxy = null;
+        private @Nullable ISubscription proxySub = null;
 
         private final IO handlerIO = IO.IN;
         private final RecipeCapability<Ingredient> capability = ItemRecipeCapability.CAP;
         private final boolean isDistinct = true;
 
-        public ProxyItemRecipeHandler(MetaMachine machine) {
-            super(machine);
+        public ProxyItemRecipeHandler() {
+            super();
         }
 
-        public void setProxy(IRecipeHandlerTrait<Ingredient> proxy) {
+        public void setProxy(@Nullable IRecipeHandlerTrait<Ingredient> proxy) {
             this.proxy = proxy;
             if (proxySub != null) {
                 proxySub.unsubscribe();
@@ -119,7 +125,8 @@ public final class ExtendProxySlotRecipeHandler {
         }
 
         @Override
-        public List<Ingredient> handleRecipeInner(IO io, GTRecipe recipe, List<Ingredient> left, boolean simulate) {
+        public @NotNull List<Ingredient> handleRecipeInner(IO io, GTRecipe recipe, List<Ingredient> left,
+                                                           boolean simulate) {
             if (proxy == null) return left;
             return proxy.handleRecipeInner(io, recipe, left, simulate);
         }
@@ -131,7 +138,7 @@ public final class ExtendProxySlotRecipeHandler {
         }
 
         @Override
-        public @NotNull List<Object> getContents() {
+        public List<Object> getContents() {
             if (proxy == null) return Collections.emptyList();
             return proxy.getContents();
         }
@@ -151,18 +158,26 @@ public final class ExtendProxySlotRecipeHandler {
     @Getter
     private static class ProxyFluidRecipeHandler extends NotifiableRecipeHandlerTrait<FluidIngredient> {
 
-        private IRecipeHandlerTrait<FluidIngredient> proxy = null;
-        private ISubscription proxySub = null;
+        public static final MachineTraitType<ProxyFluidRecipeHandler> TYPE = new MachineTraitType<>(
+                ProxyFluidRecipeHandler.class);
+
+        @Override
+        public MachineTraitType<ProxyFluidRecipeHandler> getTraitType() {
+            return TYPE;
+        }
+
+        private @Nullable IRecipeHandlerTrait<FluidIngredient> proxy = null;
+        private @Nullable ISubscription proxySub = null;
 
         private final IO handlerIO = IO.IN;
         private final RecipeCapability<FluidIngredient> capability = FluidRecipeCapability.CAP;
         private final boolean isDistinct = true;
 
-        public ProxyFluidRecipeHandler(MetaMachine machine) {
-            super(machine);
+        public ProxyFluidRecipeHandler() {
+            super();
         }
 
-        public void setProxy(IRecipeHandlerTrait<FluidIngredient> proxy) {
+        public void setProxy(@Nullable IRecipeHandlerTrait<FluidIngredient> proxy) {
             this.proxy = proxy;
             if (proxySub != null) {
                 proxySub.unsubscribe();
@@ -174,8 +189,8 @@ public final class ExtendProxySlotRecipeHandler {
         }
 
         @Override
-        public List<FluidIngredient> handleRecipeInner(IO io, GTRecipe recipe, List<FluidIngredient> left,
-                                                       boolean simulate) {
+        public @NotNull List<FluidIngredient> handleRecipeInner(IO io, GTRecipe recipe, List<FluidIngredient> left,
+                                                                boolean simulate) {
             if (proxy == null) return left;
             return proxy.handleRecipeInner(io, recipe, left, simulate);
         }
@@ -187,7 +202,7 @@ public final class ExtendProxySlotRecipeHandler {
         }
 
         @Override
-        public @NotNull List<Object> getContents() {
+        public List<Object> getContents() {
             if (proxy == null) return Collections.emptyList();
             return proxy.getContents();
         }

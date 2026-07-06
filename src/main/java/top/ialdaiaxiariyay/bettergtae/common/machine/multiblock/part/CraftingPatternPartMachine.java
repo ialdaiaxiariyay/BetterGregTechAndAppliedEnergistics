@@ -1,24 +1,24 @@
 package top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part;
 
-import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.trait.CraftingPatternInternalSlotRecipeHandler;
-
+import com.gregtechceu.gtceu.api.blockentity.BlockEntityCreationInfo;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
-import com.gregtechceu.gtceu.api.gui.GuiTextures;
-import com.gregtechceu.gtceu.api.gui.fancy.ConfiguratorPanel;
-import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
-import com.gregtechceu.gtceu.api.machine.MultiblockMachineDefinition;
 import com.gregtechceu.gtceu.api.machine.TickableSubscription;
-import com.gregtechceu.gtceu.api.machine.fancyconfigurator.ButtonConfigurator;
 import com.gregtechceu.gtceu.api.machine.feature.IDataStickInteractable;
-import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiController;
+import com.gregtechceu.gtceu.api.machine.mui.MachineUIPanelBuilder;
+import com.gregtechceu.gtceu.api.machine.multiblock.MultiblockControllerMachine;
+import com.gregtechceu.gtceu.api.machine.trait.NotifiableFluidTank;
+import com.gregtechceu.gtceu.api.machine.trait.NotifiableItemStackHandler;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
 import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient;
 import com.gregtechceu.gtceu.api.recipe.ingredient.SizedIngredient;
+import com.gregtechceu.gtceu.api.sync_system.annotations.SaveField;
+import com.gregtechceu.gtceu.api.sync_system.annotations.SyncToClient;
 import com.gregtechceu.gtceu.api.transfer.item.CustomItemStackHandler;
 import com.gregtechceu.gtceu.common.data.machines.GTAEMachines;
-import com.gregtechceu.gtceu.common.item.IntCircuitBehaviour;
-import com.gregtechceu.gtceu.integration.ae2.gui.widget.AETextInputButtonWidget;
-import com.gregtechceu.gtceu.integration.ae2.gui.widget.slot.AEPatternViewSlotWidget;
+import com.gregtechceu.gtceu.common.item.behavior.IntCircuitBehaviour;
+import com.gregtechceu.gtceu.common.mui.GTGuiTextures;
+import com.gregtechceu.gtceu.common.mui.GTMuiMachineUtil;
+import com.gregtechceu.gtceu.common.mui.widgets.PopupPanel;
 import com.gregtechceu.gtceu.integration.ae2.machine.MEBusPartMachine;
 import com.gregtechceu.gtceu.utils.GTMath;
 import com.gregtechceu.gtceu.utils.ItemStackHashStrategy;
@@ -28,13 +28,13 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.TickTask;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidType;
 
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.crafting.PatternDetailsHelper;
@@ -43,33 +43,38 @@ import appeng.api.inventories.InternalInventory;
 import appeng.api.networking.IGrid;
 import appeng.api.networking.IGridNodeListener;
 import appeng.api.networking.crafting.ICraftingProvider;
+import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.*;
 import appeng.api.storage.MEStorage;
 import appeng.api.storage.StorageHelper;
 import appeng.crafting.pattern.CraftingPatternItem;
 import appeng.helpers.patternprovider.PatternContainer;
+import brachy.modularui.api.IPanelHandler;
+import brachy.modularui.api.drawable.Text;
+import brachy.modularui.drawable.DynamicDrawable;
+import brachy.modularui.factory.PosGuiData;
+import brachy.modularui.screen.RichTooltip;
+import brachy.modularui.screen.UISettings;
+import brachy.modularui.value.sync.BooleanSyncValue;
+import brachy.modularui.value.sync.PanelSyncManager;
+import brachy.modularui.value.sync.SyncHandlers;
+import brachy.modularui.widget.ParentWidget;
+import brachy.modularui.widgets.ButtonWidget;
+import brachy.modularui.widgets.layout.Flow;
+import brachy.modularui.widgets.layout.Grid;
+import brachy.modularui.widgets.slot.ItemSlot;
+import brachy.modularui.widgets.slot.SlotGroup;
+import brachy.modularui.widgets.textfield.TextFieldWidget;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
-import com.lowdragmc.lowdraglib.gui.util.ClickData;
-import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
-import com.lowdragmc.lowdraglib.gui.widget.Widget;
-import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
-import com.lowdragmc.lowdraglib.syncdata.IContentChangeAware;
-import com.lowdragmc.lowdraglib.syncdata.ITagSerializable;
-import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
-import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
-import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
 import it.unimi.dsi.fastutil.objects.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.VisibleForTesting;
+import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.trait.CraftingPatternInternalSlotRecipeHandler;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
@@ -78,9 +83,8 @@ import javax.annotation.ParametersAreNonnullByDefault;
 public class CraftingPatternPartMachine extends MEBusPartMachine
                                         implements ICraftingProvider, PatternContainer, IDataStickInteractable {
 
-    protected static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(
-            CraftingPatternPartMachine.class, MEBusPartMachine.MANAGED_FIELD_HOLDER);
     protected static final int MAX_PATTERN_COUNT = 81;
+
     private final InternalInventory internalPatternInventory = new InternalInventory() {
 
         @Override
@@ -102,20 +106,26 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
     };
 
     @Getter
-    @Persisted
-    @DescSynced // Maybe an Expansion Option in the future? a bit redundant for rn. Maybe Packdevs want to add their own
-    // version.
+    @SaveField
+    @SyncToClient
     private final CustomItemStackHandler patternInventory = new CustomItemStackHandler(MAX_PATTERN_COUNT);
 
     @Getter
-    @Persisted
+    @SaveField
+    protected final NotifiableItemStackHandler shareInventory;
+
+    @Getter
+    @SaveField
+    protected final NotifiableFluidTank shareTank;
+
+    @Getter
+    @SaveField
     protected final InternalSlot[] internalInventory = new InternalSlot[MAX_PATTERN_COUNT];
 
     private final BiMap<IPatternDetails, InternalSlot> detailsSlotMap = HashBiMap.create(MAX_PATTERN_COUNT);
 
-    @DescSynced
-    @Persisted
-    @Setter
+    @SyncToClient
+    @SaveField
     private String customName = "";
 
     private boolean needPatternSync;
@@ -126,37 +136,38 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
     @Nullable
     protected TickableSubscription updateSubs;
 
-    public final Object2LongLinkedOpenHashMap<GenericStack> outputItems;
-
+    // 新增字段
+    public final Object2LongLinkedOpenHashMap<GenericStack> outputItems = new Object2LongLinkedOpenHashMap<>();
     @Getter
-    private final BiMap<@NotNull IPatternDetails, Integer> patternSlotMap;
+    private final BiMap<IPatternDetails, Integer> patternSlotMap = HashBiMap.create();
 
-    public CraftingPatternPartMachine(IMachineBlockEntity holder, Object... args) {
-        super(holder, IO.IN, args);
-        this.patternInventory.setFilter(stack -> stack.getItem() instanceof CraftingPatternItem);
+    public CraftingPatternPartMachine(BlockEntityCreationInfo info) {
+        super(info, IO.IN);
+        patternInventory.setFilter(stack -> stack.getItem() instanceof CraftingPatternItem);
+        patternInventory.setOnContentsChanged(() -> syncDataHolder.markClientSyncFieldDirty("patternInventory"));
+
         for (int i = 0; i < this.internalInventory.length; i++) {
             this.internalInventory[i] = new InternalSlot();
         }
-        outputItems = new Object2LongLinkedOpenHashMap<>();
-        patternSlotMap = HashBiMap.create();
         getMainNode().addService(ICraftingProvider.class, this);
+
+        this.shareInventory = attachTrait(new NotifiableItemStackHandler(9, IO.IN, IO.NONE));
+        this.shareTank = attachTrait(new NotifiableFluidTank(9, 8 * FluidType.BUCKET_VOLUME, IO.IN, IO.NONE));
         this.internalRecipeHandler = new CraftingPatternInternalSlotRecipeHandler(this, internalInventory);
     }
 
     @Override
     public void onLoad() {
         super.onLoad();
-        if (getLevel() instanceof ServerLevel serverLevel) {
-            serverLevel.getServer().tell(new TickTask(1, () -> {
-                for (int i = 0; i < patternInventory.getSlots(); i++) {
-                    var pattern = patternInventory.getStackInSlot(i);
-                    var patternDetails = PatternDetailsHelper.decodePattern(pattern, getLevel());
-                    if (patternDetails != null) {
-                        this.detailsSlotMap.put(patternDetails, this.internalInventory[i]);
-                    }
+        if (!isRemote()) {
+            for (int i = 0; i < patternInventory.getSlots(); i++) {
+                var pattern = patternInventory.getStackInSlot(i);
+                var patternDetails = PatternDetailsHelper.decodePattern(pattern, getLevel());
+                if (patternDetails != null) {
+                    this.detailsSlotMap.put(patternDetails, this.internalInventory[i]);
                 }
-                needPatternSync = true;
-            }));
+            }
+            needPatternSync = true;
         }
     }
 
@@ -168,6 +179,12 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
     @Override
     public boolean isWorkingEnabled() {
         return true;
+    }
+
+    public void setCustomName(String newName) {
+        customName = newName;
+        syncDataHolder.markClientSyncFieldDirty("customName");
+        markAsChanged();
     }
 
     @Override
@@ -203,18 +220,15 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
         }
     }
 
-    private void refundAll(ClickData clickData) {
-        if (!clickData.isRemote) {
-            for (InternalSlot internalSlot : internalInventory) {
-                internalSlot.refund();
-            }
+    private void refundAll() {
+        for (InternalSlot internalSlot : internalInventory) {
+            internalSlot.refund();
         }
     }
 
-    private void onPatternChange(int index) {
+    @VisibleForTesting
+    public void onPatternChange(int index) {
         if (isRemote()) return;
-
-        // remove old if applicable
         var internalInv = internalInventory[index];
         var newPattern = patternInventory.getStackInSlot(index);
         var newPatternDetails = PatternDetailsHelper.decodePattern(newPattern, getLevel());
@@ -223,78 +237,165 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
         if (oldPatternDetails != null && !oldPatternDetails.equals(newPatternDetails)) {
             internalInv.refund();
         }
-
         needPatternSync = true;
     }
 
-    //////////////////////////////////////
-    // ********** GUI ***********//
-    //////////////////////////////////////
+    // =========================== UI (ModularUI) ===========================
     @Override
-    public void attachConfigurators(ConfiguratorPanel configuratorPanel) {
-        configuratorPanel.attachConfigurators(new ButtonConfigurator(
-                new GuiTextureGroup(GuiTextures.BUTTON, GuiTextures.REFUND_OVERLAY), this::refundAll)
-                .setTooltips(List.of(Component.translatable("gui.gtceu.refund_all.desc"))));
-    }
+    public MachineUIPanelBuilder getPanelBuilder(PosGuiData data, PanelSyncManager syncManager, UISettings settings) {
+        IPanelHandler renamingPanelHandler = syncManager.syncedPanel("renaming", true,
+                (sm, handler) -> PopupPanel.createPopupPanel("renaming_panel", 110, 40)
+                        .child(Flow.col()
+                                .coverChildren()
+                                .child(Text.lang("gtceu.gui.pattern_buffer.set_custom_name").asWidget())
+                                .child(new TextFieldWidget()
+                                        .size(90, 20)
+                                        .value(SyncHandlers.string(() -> this.customName, this::setCustomName)))
+                                .margin(5)));
 
-    @Override
-    public Widget createUIWidget() {
-        int rowSize = 9;
-        int colSize = 9;
-        var group = new WidgetGroup(0, 0, 18 * rowSize + 16, 18 * colSize + 16);
-        int index = 0;
-        for (int y = 0; y < colSize; ++y) {
-            for (int x = 0; x < rowSize; ++x) {
-                int finalI = index;
-                var slot = new AEPatternViewSlotWidget(patternInventory, index++, 8 + x * 18, 14 + y * 18)
-                        .setOccupiedTexture(GuiTextures.SLOT)
-                        .setItemHook(stack -> {
-                            if (!stack.isEmpty() && stack.getItem() instanceof CraftingPatternItem iep) {
-                                final ItemStack out = iep.getOutput(stack);
-                                if (!out.isEmpty()) {
-                                    return out;
-                                }
+        IPanelHandler sharedItemsPanelHandler = syncManager.syncedPanel("shared_items", true,
+                (sm, handler) -> {
+                    SlotGroup sharedItemSlotGroup = new SlotGroup("shared_item_slots", 3, false);
+                    return PopupPanel.createPopupPanel("shared_items_panel", 80, 86)
+                            .child(Text.lang("gui.gtceu.share_inventory.title").asWidget().margin(4))
+                            .child(new Grid()
+                                    .name("shared_item_grid")
+                                    .top(26)
+                                    .height(18 * 3)
+                                    .minElementMargin(0, 0)
+                                    .minColWidth(18).minRowHeight(18)
+                                    .leftRel(0.5f)
+                                    .gridOfSizeWidth(9, 3, (x, y, index) -> new ItemSlot()
+                                            .slot(SyncHandlers.itemSlot(shareInventory, index)
+                                                    .slotGroup(sharedItemSlotGroup)
+                                                    .accessibility(true, true))));
+                });
+
+        IPanelHandler sharedFluidsPanelHandler = syncManager.syncedPanel("shared_fluids", true,
+                (sm, handler) -> PopupPanel.createPopupPanel("shared_fluids_panel", 85, 86)
+                        .child(Text.lang("gui.gtceu.share_tank.title").asWidget().margin(4))
+                        .child(GTMuiMachineUtil.createSlotGroupFromInventory(sm, shareTank,
+                                "shared_fluid_slots", 9, 'F',
+                                GTMuiMachineUtil.createSquareMatrix(9, 'F'))
+                                .top(26)
+                                .leftRel(0.5f)));
+
+        BooleanSyncValue canRefundValue = SyncHandlers.bool(this::canRefund, b -> {});
+        syncManager.syncValue("can_refund", canRefundValue);
+        syncManager.registerServerSyncedAction("refundButtonPressed", packet -> refundAll());
+
+        return MachineUIPanelBuilder.panelBuilder(this)
+                .leftConfigurators(f -> f.child(new ButtonWidget<>() // Shared items
+                        .size(18)
+                        .onMousePressed((context, b) -> {
+                            if (b == 0) {
+                                sharedItemsPanelHandler.openPanel();
+                                return true;
                             }
-                            return stack;
+                            return false;
                         })
-                        .setChangeListener(() -> onPatternChange(finalI))
-                        .setBackground(GuiTextures.SLOT, GuiTextures.PATTERN_OVERLAY);
-                group.addWidget(slot);
-            }
-        }
-        // ME Network status
-        group.addWidget(new LabelWidget(
-                8,
-                2,
-                () -> this.isOnline ? "gtceu.gui.me_network.online" : "gtceu.gui.me_network.offline"));
-
-        group.addWidget(new AETextInputButtonWidget(18 * rowSize + 8 - 70, 2, 70, 10)
-                .setText(customName)
-                .setOnConfirm(this::setCustomName)
-                .setButtonTooltips(Component.translatable("gui.gtceu.rename.desc")));
-
-        return group;
+                        .overlay(GTGuiTextures.BUTTON_ITEM_OUTPUT)
+                        .tooltip(new RichTooltip()
+                                .addLine(Text.lang("gui.gtceu.share_inventory.desc.0"))
+                                .addLine(Text.lang("gui.gtceu.share_inventory.desc.1"))))
+                        .child(new ButtonWidget<>() // Shared fluids
+                                .size(18)
+                                .onMousePressed((context, b) -> {
+                                    if (b == 0) {
+                                        sharedFluidsPanelHandler.openPanel();
+                                        return true;
+                                    }
+                                    return false;
+                                })
+                                .overlay(GTGuiTextures.BUTTON_FLUID_OUTPUT)
+                                .tooltip(new RichTooltip()
+                                        .addLine(Text.lang("gui.gtceu.share_tank.desc.0"))
+                                        .addLine(Text.lang("gui.gtceu.share_inventory.desc.1"))))
+                        .child(new ButtonWidget<>() // Refund
+                                .size(18)
+                                .onMousePressed((context, b) -> {
+                                    if (canRefundValue.getBoolValue() && b == 0) {
+                                        syncManager.callSyncedAction("refundButtonPressed");
+                                        return true;
+                                    }
+                                    return false;
+                                })
+                                .overlay(new DynamicDrawable(() -> GTGuiTextures.REFUND_OVERLAY.asIcon().size(16)))
+                                .tooltip(new RichTooltip().addLine(Text.lang("gui.gtceu.refund_all.desc"))))
+                        .child(new ButtonWidget<>() // Rename
+                                .size(18)
+                                .onMousePressed((context, b) -> {
+                                    if (b == 0) {
+                                        renamingPanelHandler.openPanel();
+                                        return true;
+                                    }
+                                    return false;
+                                })
+                                .overlay(Text.str("✎").asIcon().size(16))
+                                .tooltip(new RichTooltip().addLine(Text.lang("gui.gtceu.rename.desc")))));
     }
 
+    @Override
+    public void buildMainUI(ParentWidget<?> mainWidget, PosGuiData guiData, PanelSyncManager syncManager,
+                            UISettings settings) {
+        SlotGroup patternSlotGroup = new SlotGroup("pattern_slots", 9, 0, true);
+        BooleanSyncValue isOnlineValue = new BooleanSyncValue(this::isOnline, this::setOnline);
+        syncManager.syncValue("is_online", isOnlineValue);
+
+        var flow = Flow.col().coverChildren();
+        flow.child(Text.dynamic(() -> isOnlineValue.getBoolValue() ?
+                Component.translatable("gtceu.gui.me_network.online") :
+                Component.translatable("gtceu.gui.me_network.offline"))
+                .asWidget().marginTop(2).marginBottom(4));
+
+        flow.child(new Grid()
+                .height(18 * (MAX_PATTERN_COUNT / 9))
+                .minElementMargin(0, 0)
+                .minColWidth(18).minRowHeight(18)
+                .leftRel(0.5f)
+                .gridOfSizeWidth(MAX_PATTERN_COUNT, 9, (x, y, index) -> new ItemSlot()
+                        .slot(SyncHandlers.itemSlot(patternInventory, index)
+                                .slotGroup(patternSlotGroup)
+                                .accessibility(true, true)
+                                .filter(stack -> stack.getItem() instanceof CraftingPatternItem)
+                                .changeListener((i, o, c, init) -> onPatternChange(index)))
+                        .background(GTGuiTextures.SLOT, GTGuiTextures.PATTERN_OVERLAY)));
+
+        mainWidget.child(flow.center());
+    }
+
+    public boolean canRefund() {
+        return Arrays.stream(internalInventory).anyMatch(slot -> !slot.isEmpty());
+    }
+
+    // =========================== ICraftingProvider & PatternContainer ===========================
     @Override
     public List<IPatternDetails> getAvailablePatterns() {
-        return detailsSlotMap.keySet().stream().filter(Objects::nonNull).toList();
+        return detailsSlotMap.keySet().stream().toList();
     }
 
     @Override
     public boolean pushPattern(IPatternDetails patternDetails, KeyCounter[] inputHolder) {
-        final GenericStack output = patternDetails.getOutputs()[0];
-        final GenericStack requireStack = patternDetails.getInputs()[0].getPossibleInputs()[0];
-        long multiplier = 0;
-        for (var inputList : inputHolder) {
-            for (var input : inputList) {
-                if (requireStack.what().equals(input.getKey())) {
-                    multiplier = input.getLongValue() / (requireStack.amount() * patternDetails.getInputs()[0].getMultiplier());
-                    break;
+        // 记录输出
+        GenericStack output = patternDetails.getOutputs()[0];
+        long multiplier = 1;
+        // 简单计算multiplier：取第一个输入的数量 / 所需数量
+        if (inputHolder.length > 0 && patternDetails.getInputs().length > 0) {
+            var firstInput = patternDetails.getInputs()[0];
+            var possible = firstInput.getPossibleInputs();
+            if (possible.length > 0) {
+                var required = possible[0];
+                for (var input : inputHolder) {
+                    var count = input.get(required.what());
+                    if (count > 0) {
+                        multiplier = count / required.amount();
+                        break;
+                    }
                 }
             }
         }
-        outputItems.addTo(output, multiplier);
+        outputItems.addTo(output, Math.max(1, multiplier));
+
         if (!isFormed() || !getMainNode().isActive() || !detailsSlotMap.containsKey(patternDetails) ||
                 !checkInput(inputHolder)) {
             return false;
@@ -324,11 +425,6 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
     }
 
     @Override
-    public ManagedFieldHolder getFieldHolder() {
-        return MANAGED_FIELD_HOLDER;
-    }
-
-    @Override
     public @Nullable IGrid getGrid() {
         return getMainNode().getGrid();
     }
@@ -340,11 +436,9 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
 
     @Override
     public PatternContainerGroup getTerminalGroup() {
-        // Has controller
         if (isFormed()) {
-            IMultiController controller = getControllers().first();
-            MultiblockMachineDefinition controllerDefinition = controller.self().getDefinition();
-            // has customName
+            MultiblockControllerMachine controller = getControllers().first();
+            var controllerDefinition = controller.getDefinition();
             if (!customName.isEmpty()) {
                 return new PatternContainerGroup(
                         AEItemKey.of(controllerDefinition.asStack()),
@@ -355,12 +449,10 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
                         ItemStack.EMPTY;
                 int circuitConfiguration = circuitStack.isEmpty() ? -1 :
                         IntCircuitBehaviour.getCircuitConfiguration(circuitStack);
-
                 Component groupName = circuitConfiguration != -1 ?
                         Component.translatable(controllerDefinition.getDescriptionId())
                                 .append(" - " + circuitConfiguration) :
                         Component.translatable(controllerDefinition.getDescriptionId());
-
                 return new PatternContainerGroup(
                         AEItemKey.of(controllerDefinition.asStack()), groupName, Collections.emptyList());
             }
@@ -380,41 +472,29 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
     }
 
     @Override
-    public void onMachineRemoved() {
-        clearInventory(patternInventory);
+    public void onMachineDestroyed() {
+        patternInventory.dropInventoryInWorld(getLevel(), getBlockPos());
+        shareInventory.dropInventoryInWorld();
     }
 
     @Override
     public InteractionResult onDataStickShiftUse(Player player, ItemStack dataStick) {
-        dataStick.getOrCreateTag().putIntArray("pos", new int[] { getPos().getX(), getPos().getY(), getPos().getZ() });
+        dataStick.getOrCreateTag().putIntArray("pos",
+                new int[] { getBlockPos().getX(), getBlockPos().getY(), getBlockPos().getZ() });
         return InteractionResult.SUCCESS;
     }
 
-    public record BufferData(Object2LongMap<ItemStack> items, Object2LongMap<FluidStack> fluids) {}
-
-    public BufferData mergeInternalSlots() {
-        var items = new Object2LongOpenCustomHashMap<>(ItemStackHashStrategy.comparingAllButCount());
-        var fluids = new Object2LongOpenHashMap<FluidStack>();
-        for (InternalSlot slot : internalInventory) {
-            slot.itemInventory.object2LongEntrySet().fastForEach(e -> items.addTo(e.getKey(), e.getLongValue()));
-            slot.fluidInventory.object2LongEntrySet().fastForEach(e -> fluids.addTo(e.getKey(), e.getLongValue()));
-        }
-        return new BufferData(items, fluids);
-    }
-
-    public class InternalSlot implements ITagSerializable<CompoundTag>, IContentChangeAware {
+    // =========================== InternalSlot (NBT serializable) ===========================
+    public class InternalSlot implements INBTSerializable<CompoundTag> {
 
         @Getter
         @Setter
         private Runnable onContentsChanged = () -> {};
-
         private final Object2LongOpenCustomHashMap<ItemStack> itemInventory = new Object2LongOpenCustomHashMap<>(
                 ItemStackHashStrategy.comparingAllButCount());
         private final Object2LongOpenHashMap<FluidStack> fluidInventory = new Object2LongOpenHashMap<>();
         private List<ItemStack> itemStacks = null;
         private List<FluidStack> fluidStacks = null;
-
-        public InternalSlot() {}
 
         public boolean isItemEmpty() {
             return itemInventory.isEmpty();
@@ -424,6 +504,10 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
             return fluidInventory.isEmpty();
         }
 
+        public boolean isEmpty() {
+            return isItemEmpty() && isFluidEmpty();
+        }
+
         public void onContentsChanged() {
             itemStacks = null;
             fluidStacks = null;
@@ -431,7 +515,7 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
         }
 
         private void add(AEKey what, long amount) {
-            if (amount <= 0L) return;
+            if (amount <= 0) return;
             if (what instanceof AEItemKey itemKey) {
                 var stack = itemKey.toStack();
                 itemInventory.addTo(stack, amount);
@@ -463,51 +547,46 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
 
         public void refund() {
             var network = getMainNode().getGrid();
-            if (network != null) {
-                MEStorage networkInv = network.getStorageService().getInventory();
-                var energy = network.getEnergyService();
+            if (network == null) return;
+            MEStorage networkInv = network.getStorageService().getInventory();
+            var energy = network.getEnergyService();
+            var actionSource = IActionSource.ofMachine(getMainNode()::getNode);
 
-                for (var it = itemInventory.object2LongEntrySet().iterator(); it.hasNext();) {
-                    var entry = it.next();
-                    var stack = entry.getKey();
-                    var count = entry.getLongValue();
-                    if (stack.isEmpty() || count == 0) {
-                        it.remove();
-                        continue;
-                    }
-
-                    var key = AEItemKey.of(stack);
-                    if (key == null) continue;
-
-                    long inserted = StorageHelper.poweredInsert(energy, networkInv, key, count, actionSource);
-                    if (inserted > 0) {
-                        count -= inserted;
-                        if (count == 0) it.remove();
-                        else entry.setValue(count);
-                    }
+            for (var it = itemInventory.object2LongEntrySet().iterator(); it.hasNext();) {
+                var entry = it.next();
+                var stack = entry.getKey();
+                var count = entry.getLongValue();
+                if (stack.isEmpty() || count == 0) {
+                    it.remove();
+                    continue;
                 }
-
-                for (var it = fluidInventory.object2LongEntrySet().iterator(); it.hasNext();) {
-                    var entry = it.next();
-                    var stack = entry.getKey();
-                    var amount = entry.getLongValue();
-                    if (stack.isEmpty() || amount == 0) {
-                        it.remove();
-                        continue;
-                    }
-
-                    var key = AEFluidKey.of(stack);
-                    if (key == null) continue;
-
-                    long inserted = StorageHelper.poweredInsert(energy, networkInv, key, amount, actionSource);
-                    if (inserted > 0) {
-                        amount -= inserted;
-                        if (amount == 0) it.remove();
-                        else entry.setValue(amount);
-                    }
+                var key = AEItemKey.of(stack);
+                if (key == null) continue;
+                long inserted = StorageHelper.poweredInsert(energy, networkInv, key, count, actionSource);
+                if (inserted > 0) {
+                    count -= inserted;
+                    if (count == 0) it.remove();
+                    else entry.setValue(count);
                 }
-                onContentsChanged();
             }
+            for (var it = fluidInventory.object2LongEntrySet().iterator(); it.hasNext();) {
+                var entry = it.next();
+                var stack = entry.getKey();
+                var amount = entry.getLongValue();
+                if (stack.isEmpty() || amount == 0) {
+                    it.remove();
+                    continue;
+                }
+                var key = AEFluidKey.of(stack);
+                if (key == null) continue;
+                long inserted = StorageHelper.poweredInsert(energy, networkInv, key, amount, actionSource);
+                if (inserted > 0) {
+                    amount -= inserted;
+                    if (amount == 0) it.remove();
+                    else entry.setValue(amount);
+                }
+            }
+            onContentsChanged();
         }
 
         public void pushPattern(IPatternDetails patternDetails, KeyCounter[] inputHolder) {
@@ -523,13 +602,11 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
                     it.remove();
                     continue;
                 }
-
                 var items = ingredient.getItems();
                 if (items.length == 0 || items[0].isEmpty()) {
                     it.remove();
                     continue;
                 }
-
                 int amount = items[0].getCount();
                 for (var it2 = itemInventory.object2LongEntrySet().iterator(); it2.hasNext();) {
                     var entry = it2.next();
@@ -548,19 +625,14 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
                         else entry.setValue(count);
                     }
                     amount -= extracted;
-
                     if (amount <= 0) {
                         it.remove();
                         break;
                     }
                 }
-
                 if (amount > 0) {
-                    if (ingredient instanceof SizedIngredient si) {
-                        si.setAmount(amount);
-                    } else {
-                        items[0].setCount(amount);
-                    }
+                    if (ingredient instanceof SizedIngredient si) si.setAmount(amount);
+                    else items[0].setCount(amount);
                 }
             }
             if (changed) onContentsChanged();
@@ -575,13 +647,11 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
                     it.remove();
                     continue;
                 }
-
                 var fluids = ingredient.getStacks();
                 if (fluids.length == 0 || fluids[0].isEmpty()) {
                     it.remove();
                     continue;
                 }
-
                 int amount = fluids[0].getAmount();
                 for (var it2 = fluidInventory.object2LongEntrySet().iterator(); it2.hasNext();) {
                     var entry = it2.next();
@@ -600,18 +670,13 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
                         else entry.setValue(count);
                     }
                     amount -= extracted;
-
                     if (amount <= 0) {
                         it.remove();
                         break;
                     }
                 }
-
-                if (amount > 0) {
-                    ingredient.setAmount(amount);
-                }
+                if (amount > 0) ingredient.setAmount(amount);
             }
-
             if (changed) onContentsChanged();
             return left.isEmpty() ? null : left;
         }
@@ -619,7 +684,6 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
         @Override
         public CompoundTag serializeNBT() {
             CompoundTag tag = new CompoundTag();
-
             ListTag itemsTag = new ListTag();
             for (var entry : itemInventory.object2LongEntrySet()) {
                 var ct = entry.getKey().serializeNBT();
@@ -627,7 +691,6 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
                 itemsTag.add(ct);
             }
             if (!itemsTag.isEmpty()) tag.put("inventory", itemsTag);
-
             ListTag fluidsTag = new ListTag();
             for (var entry : fluidInventory.object2LongEntrySet()) {
                 var ct = entry.getKey().writeToNBT(new CompoundTag());
@@ -635,7 +698,6 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
                 fluidsTag.add(ct);
             }
             if (!fluidsTag.isEmpty()) tag.put("fluidInventory", fluidsTag);
-
             return tag;
         }
 
@@ -646,19 +708,14 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
                 if (!(t instanceof CompoundTag ct)) continue;
                 var stack = ItemStack.of(ct);
                 var count = ct.getLong("real");
-                if (!stack.isEmpty() && count > 0) {
-                    itemInventory.put(stack, count);
-                }
+                if (!stack.isEmpty() && count > 0) itemInventory.put(stack, count);
             }
-
             ListTag fluids = tag.getList("fluidInventory", Tag.TAG_COMPOUND);
             for (Tag t : fluids) {
                 if (!(t instanceof CompoundTag ct)) continue;
                 var stack = FluidStack.loadFluidStackFromNBT(ct);
                 var amount = ct.getLong("real");
-                if (!stack.isEmpty() && amount > 0) {
-                    fluidInventory.put(stack, amount);
-                }
+                if (!stack.isEmpty() && amount > 0) fluidInventory.put(stack, amount);
             }
         }
     }

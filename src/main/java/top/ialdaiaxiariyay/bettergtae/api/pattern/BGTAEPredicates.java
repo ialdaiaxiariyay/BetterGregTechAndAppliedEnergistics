@@ -1,141 +1,128 @@
 package top.ialdaiaxiariyay.bettergtae.api.pattern;
 
-import com.gregtechceu.gtceu.api.pattern.Predicates;
-import com.gregtechceu.gtceu.api.pattern.TraceabilityPredicate;
-import com.gregtechceu.gtceu.api.pattern.error.PatternStringError;
+import com.gregtechceu.gtceu.api.multiblock.PatternPredicate;
+import com.gregtechceu.gtceu.api.multiblock.Predicates;
+import com.gregtechceu.gtceu.api.multiblock.error.BlockMatchingError;
+import com.gregtechceu.gtceu.api.multiblock.util.BlockInfo;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
-import com.lowdragmc.lowdraglib.utils.BlockInfo;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class BGTAEPredicates extends Predicates {
 
     /**
-     * <p>
-     * {@code tieredBlocks(MACHINE_CASINGS, "MachineCasing"); All Tier}
-     * </p>
-     * <P>
-     * {@code tieredBlocks(MACHINE_CASINGS, "MachineCasing", 2); Tier is 2}
-     * </p>
+     * 匹配指定等级（tier）的方块，所有等级的块都允许（不检查一致性）。
+     *
+     * @param map      等级 -> 方块供应器
+     * @param tierType 用于工具提示的等级类型名称
+     * @return PatternPredicate
      */
-
-    public static TraceabilityPredicate tieredBlocks(Map<Integer, Supplier<? extends Block>> map, String tierType) {
+    public static PatternPredicate tieredBlocks(Map<Integer, Supplier<? extends Block>> map, String tierType) {
         return tieredBlocks(map, tierType, -1);
     }
 
-    public static TraceabilityPredicate tieredBlocks(Map<Integer, Supplier<? extends Block>> map, String tierType, int specifiedTier) {
-        BlockInfo[] blockInfos;
+    /**
+     * 匹配特定等级的方块。
+     *
+     * @param map           等级 -> 方块供应器
+     * @param tierType      用于工具提示的等级类型名称
+     * @param specifiedTier 指定等级，若为 -1 则匹配所有等级
+     * @return PatternPredicate
+     */
+    public static PatternPredicate tieredBlocks(Map<Integer, Supplier<? extends Block>> map, String tierType,
+                                                int specifiedTier) {
+        // 构建候选 BlockInfo
+        List<BlockInfo> candidates = map.entrySet().stream()
+                .filter(entry -> specifiedTier < 0 || entry.getKey() == specifiedTier)
+                .sorted(Map.Entry.comparingByKey())
+                .map(entry -> BlockInfo.fromBlock(entry.getValue().get()))
+                .collect(Collectors.toList());
 
-        if (specifiedTier >= 0) {
-            var supplier = map.get(specifiedTier);
-            if (supplier != null) {
-                var block = supplier.get();
-                blockInfos = new BlockInfo[] { BlockInfo.fromBlockState(block.defaultBlockState()) };
-            } else {
-                blockInfos = new BlockInfo[0];
-            }
-        } else {
-            blockInfos = map.entrySet().stream()
-                    .sorted(Map.Entry.comparingByKey())
-                    .map(entry -> {
-                        var block = entry.getValue().get();
-                        return BlockInfo.fromBlockState(block.defaultBlockState());
-                    })
-                    .toArray(BlockInfo[]::new);
-        }
-
-        return new TraceabilityPredicate(blockWorldState -> {
-            var blockState = blockWorldState.getBlockState();
-            for (var entry : map.entrySet()) {
-                if (blockState.is(entry.getValue().get())) {
-                    var tier = entry.getKey();
-
-                    if (specifiedTier >= 0 && tier != specifiedTier) {
-                        return false;
+        // 测试函数
+        return new PatternPredicate(
+                "TieredBlocks_" + tierType,
+                worldState -> {
+                    BlockState blockState = worldState.getBlockState();
+                    for (Map.Entry<Integer, Supplier<? extends Block>> entry : map.entrySet()) {
+                        if (blockState != null && blockState.is(entry.getValue().get())) {
+                            int tier = entry.getKey();
+                            if (specifiedTier >= 0 && tier != specifiedTier) {
+                                // 若指定等级且不匹配，返回错误
+                                return new BlockMatchingError(worldState.getBlockPos(),
+                                        candidates.stream().map(BlockInfo::getBlockState).map(BlockState::getBlock)
+                                                .collect(Collectors.toList()));
+                            }
+                            // 匹配成功
+                            return null;
+                        }
                     }
-
-                    Object currentTier = blockWorldState.getMatchContext().getOrPut(tierType, tier);
-                    if (!currentTier.equals(tier)) {
-                        blockWorldState.setError(new PatternStringError("bettergtae.multiblock.pattern.error.tier"));
-                        return false;
-                    }
-                    return true;
-                }
-            }
-            return false;
-        }, () -> blockInfos).addTooltips(Component.translatable("bettergtae.multiblock.pattern.error.tier"));
+                    // 无一匹配
+                    return new BlockMatchingError(worldState.getBlockPos(),
+                            candidates.stream().map(BlockInfo::getBlockState).map(BlockState::getBlock)
+                                    .collect(Collectors.toList()));
+                },
+                candidates).addTooltips(Component.translatable("bettergtae.multiblock.pattern.error.tier"));
     }
 
     /**
-     * <p>
-     * {@code typedBlocks(COILS, "CoilType", null, Comparator.comparing(CoilType::getTier));}
-     * </p>
-     * <p>
-     * {@code  typedBlocks(COILS, "CoilType", CoilType.KANTHAL, null);}
-     * </p>
+     * 匹配特定类型的方块（泛型）。
+     *
+     * @param blockMap      类型 -> 方块供应器
+     * @param typeKey       类型键名（用于工具提示）
+     * @param specifiedType 指定类型，若为 null 则匹配所有类型
+     * @param comparator    排序比较器（仅用于候选列表显示，可为 null）
+     * @param <T>           类型参数
+     * @return PatternPredicate
      */
+    public static <T> PatternPredicate typedBlocks(
+                                                   Map<T, Supplier<? extends Block>> blockMap,
+                                                   String typeKey,
+                                                   @Nullable T specifiedType,
+                                                   @Nullable Comparator<T> comparator) {
+        // 构建候选 BlockInfo
+        List<BlockInfo> candidates = blockMap.entrySet().stream()
+                .filter(entry -> specifiedType == null || entry.getKey().equals(specifiedType))
+                .sorted(comparator == null ?
+                        Map.Entry.comparingByKey(Comparator.comparing(Object::toString)) :
+                        Map.Entry.comparingByKey(comparator))
+                .map(entry -> BlockInfo.fromBlock(entry.getValue().get()))
+                .collect(Collectors.toList());
 
-    public static <T> TraceabilityPredicate typedBlocks(
-                                                        Map<T, Supplier<? extends Block>> blockMap,
-                                                        String typeKey,
-                                                        @Nullable T specifiedType,
-                                                        @Nullable Comparator<T> comparator) {
-        BlockInfo[] blockInfos;
-        if (specifiedType != null) {
-            var supplier = blockMap.get(specifiedType);
-            if (supplier != null) {
-                var block = supplier.get();
-                blockInfos = new BlockInfo[] { BlockInfo.fromBlockState(block.defaultBlockState()) };
-            } else {
-                blockInfos = new BlockInfo[0];
-            }
-        } else {
-            var stream = blockMap.entrySet().stream();
-
-            if (comparator != null) {
-                stream = stream.sorted(Map.Entry.comparingByKey(comparator));
-            }
-
-            blockInfos = stream
-                    .map(entry -> {
-                        var block = entry.getValue().get();
-                        return BlockInfo.fromBlockState(block.defaultBlockState());
-                    })
-                    .toArray(BlockInfo[]::new);
-        }
-
-        return new TraceabilityPredicate(blockWorldState -> {
-            var blockState = blockWorldState.getBlockState();
-
-            T blockType = null;
-            for (var entry : blockMap.entrySet()) {
-                if (blockState.is(entry.getValue().get())) {
-                    blockType = entry.getKey();
-                    break;
-                }
-            }
-
-            if (blockType == null) {
-                return false;
-            }
-
-            if (specifiedType != null && !blockType.equals(specifiedType)) {
-                return false;
-            }
-
-            Object currentType = blockWorldState.getMatchContext().getOrPut(typeKey, blockType);
-            if (!currentType.equals(blockType)) {
-                blockWorldState.setError(new PatternStringError("bettergtae.multiblock.pattern.error.tier"));
-                return false;
-            }
-
-            return true;
-        }, () -> blockInfos).addTooltips(Component.translatable("bettergtae.multiblock.pattern.error.tier"));
+        return new PatternPredicate(
+                "TypedBlocks_" + typeKey,
+                worldState -> {
+                    BlockState blockState = worldState.getBlockState();
+                    T matchedType = null;
+                    for (Map.Entry<T, Supplier<? extends Block>> entry : blockMap.entrySet()) {
+                        if (blockState.is(entry.getValue().get())) {
+                            matchedType = entry.getKey();
+                            break;
+                        }
+                    }
+                    if (matchedType == null) {
+                        // 无匹配
+                        return new BlockMatchingError(worldState.getBlockPos(),
+                                candidates.stream().map(BlockInfo::getBlockState).map(BlockState::getBlock)
+                                        .collect(Collectors.toList()));
+                    }
+                    if (specifiedType != null && !matchedType.equals(specifiedType)) {
+                        // 指定类型不匹配
+                        return new BlockMatchingError(worldState.getBlockPos(),
+                                candidates.stream().map(BlockInfo::getBlockState).map(BlockState::getBlock)
+                                        .collect(Collectors.toList()));
+                    }
+                    // 匹配成功，不再检查全局一致性（旧API中的MatchContext已移除）
+                    return null;
+                },
+                candidates).addTooltips(Component.translatable("bettergtae.multiblock.pattern.error.tier"));
     }
 }

@@ -1,12 +1,5 @@
 package top.ialdaiaxiariyay.bettergtae.common;
 
-import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
-import top.ialdaiaxiariyay.bettergtae.api.registrate.BGTAERegistrate;
-import top.ialdaiaxiariyay.bettergtae.common.data.BGTAECreativeModeTabs;
-import top.ialdaiaxiariyay.bettergtae.common.data.machine.BGTAEMachines;
-import top.ialdaiaxiariyay.bettergtae.common.item.InfinityCellGuiHandler;
-import top.ialdaiaxiariyay.bettergtae.common.item.InfinityCellHandler;
-
 import com.gregtechceu.gtceu.api.GTCEuAPI;
 import com.gregtechceu.gtceu.api.machine.MachineDefinition;
 
@@ -16,10 +9,15 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import appeng.api.storage.StorageCells;
+import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
+import top.ialdaiaxiariyay.bettergtae.api.registrate.BGTAERegistrate;
+import top.ialdaiaxiariyay.bettergtae.common.data.BGTAECreativeModeTabs;
+import top.ialdaiaxiariyay.bettergtae.common.data.machine.BGTAEMachines;
+import top.ialdaiaxiariyay.bettergtae.common.item.InfinityCellGuiHandler;
+import top.ialdaiaxiariyay.bettergtae.common.item.InfinityCellHandler;
 
 public class CommonProxy {
 
-    @SuppressWarnings("removal")
     public CommonProxy() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         BGTAERegistrate.REGISTRATE.registerEventListeners(modEventBus);

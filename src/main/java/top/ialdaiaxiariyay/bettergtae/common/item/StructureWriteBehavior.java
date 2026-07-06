@@ -1,35 +1,29 @@
 package top.ialdaiaxiariyay.bettergtae.common.item;
 
-import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
-import top.ialdaiaxiariyay.bettergtae.utils.RegistriesUtil;
-
-import com.gregtechceu.gtceu.api.gui.GuiTextures;
 import com.gregtechceu.gtceu.api.item.ComponentItem;
-import com.gregtechceu.gtceu.api.item.component.IItemUIFactory;
-import com.gregtechceu.gtceu.api.pattern.util.RelativeDirection;
+import com.gregtechceu.gtceu.api.mui.IItemUIHolder;
+import com.gregtechceu.gtceu.api.multiblock.util.RelativeDirection;
+import com.gregtechceu.gtceu.common.mui.GTGuiTextures;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.InteractionResultHolder;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.level.Level;
 
+import brachy.modularui.api.drawable.Text;
+import brachy.modularui.factory.PlayerInventoryGuiData;
+import brachy.modularui.screen.ModularPanel;
+import brachy.modularui.screen.UISettings;
+import brachy.modularui.value.sync.PanelSyncManager;
+import brachy.modularui.widget.ParentWidget;
+import brachy.modularui.widgets.ButtonWidget;
 import com.google.common.base.Joiner;
-import com.lowdragmc.lowdraglib.gui.factory.HeldItemUIFactory;
-import com.lowdragmc.lowdraglib.gui.modular.ModularUI;
-import com.lowdragmc.lowdraglib.gui.texture.GuiTextureGroup;
-import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
-import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
-import com.lowdragmc.lowdraglib.gui.widget.ImageWidget;
-import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
-import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
+import top.ialdaiaxiariyay.bettergtae.utils.RegistriesUtil;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -38,74 +32,93 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class StructureWriteBehavior implements IItemUIFactory {
+public class StructureWriteBehavior implements IItemUIHolder {
 
     public static final StructureWriteBehavior INSTANCE = new StructureWriteBehavior();
 
     protected StructureWriteBehavior() {}
 
     @Override
-    public ModularUI createUI(HeldItemUIFactory.HeldItemHolder playerInventoryHolder,
-                              Player entityPlayer) {
-        var container = new WidgetGroup(8, 8, 200, 200);
-        container
-                .addWidget(new ImageWidget(4, 4, 152, 46, GuiTextures.DISPLAY))
-                .addWidget(new LabelWidget(7, 7, () -> {
-                    int x = 0;
-                    int y = 0;
-                    int z = 0;
-                    if (getPos(playerInventoryHolder.getHeld()) != null) {
-                        BlockPos[] blockPos = getPos(playerInventoryHolder.getHeld());
-                        if (blockPos != null) {
-                            x = 1 + blockPos[1].getX() - blockPos[0].getX();
-                            y = 1 + blockPos[1].getY() - blockPos[0].getY();
-                            z = 1 + blockPos[1].getZ() - blockPos[0].getZ();
-                        }
-                    }
-                    return String.format("Structural scale: X:%d Y:%d Z:%d", x, y, z);
-                }).setTextColor(0xFAF9F6)).addWidget(new LabelWidget(7, 20, () -> {
-                    var direction = getDir(playerInventoryHolder.getHeld());
-                    var dirs = DebugBlockPattern.getDir(direction);
-                    return String.format("Export order: C:%s S:%s A:%s", dirs[0].name(), dirs[1].name(), dirs[2].name());
-                }).setTextColor(0xFAF9F6));
-        container.setBackground(GuiTextures.BACKGROUND_INVERSE);
-        return new ModularUI(176, 120, playerInventoryHolder, entityPlayer)
-                .background(GuiTextures.BACKGROUND)
-                .widget(container)
-                .widget(new ButtonWidget(
-                        9,
-                        91,
-                        158,
-                        20,
-                        new GuiTextureGroup(
-                                GuiTextures.BUTTON,
-                                new TextTexture("Export")),
-                        clickData -> export(playerInventoryHolder)))
-                .widget(new ButtonWidget(
-                        9,
-                        68,
-                        77,
-                        20,
-                        new GuiTextureGroup(
-                                GuiTextures.BUTTON,
-                                new TextTexture("Rotate X axis")),
-                        clickData -> changeDirX(playerInventoryHolder)))
-                .widget(new ButtonWidget(
-                        90,
-                        68,
-                        77,
-                        20,
-                        new GuiTextureGroup(
-                                GuiTextures.BUTTON,
-                                new TextTexture("rotate Y axis")),
-                        clickData -> changeDirY(playerInventoryHolder)));
+    public ModularPanel<?> buildUI(PlayerInventoryGuiData<?> data, PanelSyncManager syncManager, UISettings settings) {
+        // 使用 ModularPanel 构建 UI
+        var panel = new ModularPanel<>("structure_writer")
+                .size(176, 120)
+                .background(GTGuiTextures.BACKGROUND);
+
+        // 主容器（类似 WidgetGroup）
+        var container = new ParentWidget<>()
+                .size(200, 200)
+                .pos(8, 8)
+                .background(GTGuiTextures.BACKGROUND_INVERSE);
+
+        // 显示坐标信息
+        container.addChild(Text.dynamic(() -> {
+            var pos = getPos(data.getUsedItemStack());
+            if (pos != null) {
+                int x = 1 + pos[1].getX() - pos[0].getX();
+                int y = 1 + pos[1].getY() - pos[0].getY();
+                int z = 1 + pos[1].getZ() - pos[0].getZ();
+                return Component.literal(String.format("Structural scale: X:%d Y:%d Z:%d", x, y, z));
+            }
+            return Component.literal("No structure selected");
+        }).asWidget().pos(7, 7).color(0xFAF9F6), -1);
+
+        // 显示方向信息
+        container.addChild(Text.dynamic(() -> {
+            var dir = getDir(data.getUsedItemStack());
+            var dirs = DebugBlockPattern.getDir(dir);
+            return Component.literal(
+                    String.format("Export order: C:%s S:%s A:%s", dirs[0].name(), dirs[1].name(), dirs[2].name()));
+        }).asWidget().pos(7, 20).color(0xFAF9F6), -1);
+
+        // Export 按钮
+        container.addChild(
+                new ButtonWidget<>()
+                        .size(158, 20)
+                        .pos(9, 91)
+                        .background(GTGuiTextures.BUTTON)
+                        .overlay(Text.str("Export").asIcon())
+                        .onMousePressed((ctx, btn) -> {
+                            export(data);
+                            return true;
+                        }),
+                -1);
+
+        // Rotate X axis 按钮
+        container.addChild(
+                new ButtonWidget<>()
+                        .size(77, 20)
+                        .pos(9, 68)
+                        .background(GTGuiTextures.BUTTON)
+                        .overlay(Text.str("Rotate X axis").asIcon())
+                        .onMousePressed((ctx, btn) -> {
+                            changeDirX(data);
+                            return true;
+                        }),
+                -1);
+
+        // Rotate Y axis 按钮
+        container.addChild(
+                new ButtonWidget<>()
+                        .size(77, 20)
+                        .pos(90, 68)
+                        .background(GTGuiTextures.BUTTON)
+                        .overlay(Text.str("Rotate Y axis").asIcon())
+                        .onMousePressed((ctx, btn) -> {
+                            changeDirY(data);
+                            return true;
+                        }),
+                -1);
+
+        panel.addChild(container, -1);
+        return panel;
     }
 
-    private void export(HeldItemUIFactory.HeldItemHolder playerInventoryHolder) {
-        if (getPos(playerInventoryHolder.getHeld()) != null &&
+    private void export(PlayerInventoryGuiData<?> playerInventoryHolder) {
+        if (getPos(playerInventoryHolder.getUsedItemStack()) != null &&
                 playerInventoryHolder.getPlayer() instanceof ServerPlayer) {
-            BlockPos[] blockPos = getPos(playerInventoryHolder.getHeld());
-            Direction direction = getDir(playerInventoryHolder.getHeld());
+            BlockPos[] blockPos = getPos(playerInventoryHolder.getUsedItemStack());
+            Direction direction = getDir(playerInventoryHolder.getUsedItemStack());
             StringBuilder builder = new StringBuilder();
             DebugBlockPattern blockPattern;
             if (blockPos != null) {
@@ -153,20 +166,20 @@ public class StructureWriteBehavior implements IItemUIFactory {
         }
     }
 
-    private void changeDirX(HeldItemUIFactory.HeldItemHolder playerInventoryHolder) {
-        if (getPos(playerInventoryHolder.getHeld()) != null &&
+    private void changeDirX(PlayerInventoryGuiData<?> playerInventoryHolder) {
+        if (getPos(playerInventoryHolder.getUsedItemStack()) != null &&
                 playerInventoryHolder.getPlayer() instanceof ServerPlayer) {
-            ItemStack itemStack = playerInventoryHolder.getHeld();
+            ItemStack itemStack = playerInventoryHolder.getUsedItemStack();
             Direction direction = getDir(itemStack);
             direction = direction.getClockWise(Direction.Axis.X);
             setDir(itemStack, direction);
         }
     }
 
-    private void changeDirY(HeldItemUIFactory.HeldItemHolder playerInventoryHolder) {
-        if (getPos(playerInventoryHolder.getHeld()) != null &&
+    private void changeDirY(PlayerInventoryGuiData<?> playerInventoryHolder) {
+        if (getPos(playerInventoryHolder.getUsedItemStack()) != null &&
                 playerInventoryHolder.getPlayer() instanceof ServerPlayer) {
-            ItemStack itemStack = playerInventoryHolder.getHeld();
+            ItemStack itemStack = playerInventoryHolder.getUsedItemStack();
             Direction direction = getDir(itemStack);
             direction = direction.getClockWise(Direction.Axis.Y);
             setDir(itemStack, direction);
@@ -247,18 +260,5 @@ public class StructureWriteBehavior implements IItemUIFactory {
             removePos(stack);
         }
         return InteractionResult.SUCCESS;
-    }
-
-    @Override
-    public InteractionResultHolder<ItemStack> use(Item item, Level level, Player player, InteractionHand usedHand) {
-        ItemStack stack = player.getItemInHand(usedHand);
-        if (player.isShiftKeyDown()) {
-            removePos(stack);
-        } else {
-            if (player instanceof ServerPlayer serverPlayer) {
-                HeldItemUIFactory.INSTANCE.openUI(serverPlayer, usedHand);
-            }
-        }
-        return new InteractionResultHolder<>(InteractionResult.SUCCESS, stack);
     }
 }

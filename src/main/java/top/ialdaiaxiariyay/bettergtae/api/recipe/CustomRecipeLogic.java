@@ -5,22 +5,25 @@ import com.gregtechceu.gtceu.api.machine.feature.IRecipeLogicMachine;
 import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 
+import lombok.Setter;
+
 import java.util.function.Supplier;
 
+@Setter
 public class CustomRecipeLogic extends RecipeLogic {
 
-    private final Supplier<GTRecipe> recipe;
+    private Supplier<GTRecipe> recipeSupplier;
 
-    public CustomRecipeLogic(IRecipeLogicMachine machine, Supplier<GTRecipe> recipeSupplier) {
-        super(machine);
-        this.recipe = recipeSupplier;
+    public CustomRecipeLogic() {
+        super();
     }
 
     @Override
     public void findAndHandleRecipe() {
         lastRecipe = null;
+        IRecipeLogicMachine machine = getRLMachine();
         if (machine.hasCapabilityProxies()) {
-            GTRecipe match = recipe.get();
+            GTRecipe match = recipeSupplier != null ? recipeSupplier.get() : null;
             if (match != null) {
                 setupRecipe(match);
             }
@@ -29,6 +32,7 @@ public class CustomRecipeLogic extends RecipeLogic {
 
     @Override
     public void onRecipeFinish() {
+        IRecipeLogicMachine machine = getRLMachine();
         machine.afterWorking();
         if (lastRecipe != null) {
             handleRecipeIO(lastRecipe, IO.OUT);
@@ -38,7 +42,7 @@ public class CustomRecipeLogic extends RecipeLogic {
             setStatus(Status.SUSPEND);
             suspendAfterFinish = false;
         } else {
-            GTRecipe match = recipe.get();
+            GTRecipe match = recipeSupplier != null ? recipeSupplier.get() : null;
             if (match != null) {
                 setupRecipe(match);
                 return;

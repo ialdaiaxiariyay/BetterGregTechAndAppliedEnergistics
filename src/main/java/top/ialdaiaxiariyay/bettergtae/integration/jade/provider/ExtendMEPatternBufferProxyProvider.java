@@ -1,69 +1,67 @@
 package top.ialdaiaxiariyay.bettergtae.integration.jade.provider;
 
+import com.gregtechceu.gtceu.GTCEu;
+import com.gregtechceu.gtceu.client.util.TooltipHelper;
+import com.gregtechceu.gtceu.integration.jade.provider.MachineInfoProvider;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.entity.BlockEntity;
+
+import snownee.jade.api.BlockAccessor;
+import snownee.jade.api.ITooltip;
+import snownee.jade.api.config.IPluginConfig;
 import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
 import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferProxyPartMachine;
 
-import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
-import com.gregtechceu.gtceu.client.util.TooltipHelper;
+import javax.annotation.ParametersAreNonnullByDefault;
 
-import net.minecraft.ChatFormatting;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
+public class ExtendMEPatternBufferProxyProvider extends
+                                                MachineInfoProvider<ExtendMEPatternBufferProxyPartMachine, CompoundTag> {
 
-import snownee.jade.api.BlockAccessor;
-import snownee.jade.api.IBlockComponentProvider;
-import snownee.jade.api.IServerDataProvider;
-import snownee.jade.api.ITooltip;
-import snownee.jade.api.config.IPluginConfig;
-
-public class ExtendMEPatternBufferProxyProvider implements IBlockComponentProvider, IServerDataProvider<BlockAccessor> {
-
-    @Override
-    public void appendTooltip(ITooltip iTooltip, BlockAccessor blockAccessor, IPluginConfig iPluginConfig) {
-        if (blockAccessor.getBlockEntity() instanceof IMachineBlockEntity blockEntity) {
-            if (blockEntity.getMetaMachine() instanceof ExtendMEPatternBufferProxyPartMachine) {
-                CompoundTag serverData = blockAccessor.getServerData();
-                if (!serverData.getBoolean("formed")) return;
-                if (!serverData.getBoolean("bound")) {
-                    iTooltip.add(Component.translatable("gtceu.top.buffer_not_bound").withStyle(ChatFormatting.RED));
-                    return;
-                }
-
-                int[] pos = serverData.getIntArray("pos");
-                iTooltip.add(Component.translatable("gtceu.top.buffer_bound_pos", pos[0], pos[1], pos[2])
-                        .withStyle(TooltipHelper.RAINBOW_HSL_SLOW));
-
-                ExtendMEPatternBufferProvider.readBufferTag(iTooltip, serverData);
-            }
-        }
+    public ExtendMEPatternBufferProxyProvider() {
+        super(BetterGTAE.id("extend_me_pattern_buffer_proxy"), ExtendMEPatternBufferProxyPartMachine.class);
     }
 
     @Override
-    public void appendServerData(CompoundTag compoundTag, BlockAccessor blockAccessor) {
-        if (blockAccessor.getBlockEntity() instanceof IMachineBlockEntity blockEntity) {
-            if (blockEntity.getMetaMachine() instanceof ExtendMEPatternBufferProxyPartMachine proxy) {
-                if (!proxy.isFormed()) {
-                    compoundTag.putBoolean("formed", false);
-                    return;
-                }
-                compoundTag.putBoolean("formed", true);
-                var buffer = proxy.getBuffer();
-                if (buffer == null) {
-                    compoundTag.putBoolean("bound", false);
-                    return;
-                }
-                compoundTag.putBoolean("bound", true);
-
-                var pos = buffer.getPos();
-                compoundTag.putIntArray("pos", new int[] { pos.getX(), pos.getY(), pos.getZ() });
-                ExtendMEPatternBufferProvider.writeBufferTag(compoundTag, buffer);
-            }
+    protected CompoundTag write(ExtendMEPatternBufferProxyPartMachine proxy) {
+        var compoundTag = new CompoundTag();
+        if (!proxy.isFormed()) {
+            compoundTag.putBoolean("formed", false);
+            return compoundTag;
         }
+        compoundTag.putBoolean("formed", true);
+        var buffer = proxy.getBuffer();
+        if (buffer == null) {
+            compoundTag.putBoolean("bound", false);
+            return compoundTag;
+        }
+        compoundTag.putBoolean("bound", true);
+
+        var pos = buffer.getBlockPos();
+        compoundTag.putIntArray("pos", new int[] { pos.getX(), pos.getY(), pos.getZ() });
+        ExtendMEPatternBufferProvider.writeBufferTag(compoundTag, buffer);
+        return compoundTag;
     }
 
     @Override
-    public ResourceLocation getUid() {
-        return BetterGTAE.id("extend_me_pattern_buffer_proxy");
+    protected void addTooltip(CompoundTag data, ITooltip tooltip, Player player, BlockAccessor block,
+                              BlockEntity blockEntity, IPluginConfig config) {
+        if (!data.getBoolean("formed")) return;
+        if (!data.getBoolean("bound")) {
+            tooltip.add(Component.translatable("gtceu.top.buffer_not_bound").withStyle(ChatFormatting.RED));
+            return;
+        }
+
+        int[] pos = data.getIntArray("pos");
+        tooltip.add(Component.translatable("gtceu.top.buffer_bound_pos", pos[0], pos[1], pos[2])
+                .withStyle(TooltipHelper.RAINBOW_HSL_SLOW));
+
+        ExtendMEPatternBufferProvider.readBufferTag(tooltip, data);
     }
 }

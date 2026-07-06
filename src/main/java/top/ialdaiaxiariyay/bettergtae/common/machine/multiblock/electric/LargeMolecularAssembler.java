@@ -1,15 +1,8 @@
 package top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.electric;
 
-import top.ialdaiaxiariyay.bettergtae.api.recipe.CustomRecipeLogic;
-import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.CraftingPatternPartMachine;
-
-import com.gregtechceu.gtceu.api.capability.IParallelHatch;
+import com.gregtechceu.gtceu.api.blockentity.BlockEntityCreationInfo;
 import com.gregtechceu.gtceu.api.capability.recipe.ItemRecipeCapability;
-import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
-import com.gregtechceu.gtceu.api.machine.MetaMachine;
-import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiController;
 import com.gregtechceu.gtceu.api.machine.multiblock.WorkableElectricMultiblockMachine;
-import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.chance.logic.ChanceLogic;
 import com.gregtechceu.gtceu.api.recipe.content.Content;
@@ -22,21 +15,27 @@ import appeng.api.stacks.AEItemKey;
 import it.unimi.dsi.fastutil.objects.Object2LongMaps;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.NotNull;
+import top.ialdaiaxiariyay.bettergtae.api.recipe.CustomRecipeLogic;
+import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.CraftingPatternPartMachine;
 
 import java.util.List;
-import java.util.Optional;
 
 public class LargeMolecularAssembler extends WorkableElectricMultiblockMachine {
 
-    public LargeMolecularAssembler(IMachineBlockEntity holder, Object... args) {
-        super(holder, args);
-    }
-
     private CraftingPatternPartMachine craftingPatternPartMachine;
 
+    public LargeMolecularAssembler(BlockEntityCreationInfo info) {
+        super(info, new CustomRecipeLogic());
+        if (getRecipeLogic() instanceof CustomRecipeLogic custom) {
+            custom.setRecipeSupplier(this::getGTRecipe);
+        }
+    }
+
     @Override
-    public void onStructureFormed() {
-        super.onStructureFormed();
+    public void formStructure(@NotNull String substructureName) {
+        super.formStructure(substructureName);
+        if (!DEFAULT_STRUCTURE.equals(substructureName)) return;
+
         for (var part : getParts()) {
             if (part instanceof CraftingPatternPartMachine hatch) {
                 this.craftingPatternPartMachine = hatch;
@@ -46,32 +45,34 @@ public class LargeMolecularAssembler extends WorkableElectricMultiblockMachine {
     }
 
     @Override
-    public void onStructureInvalid() {
-        super.onStructureInvalid();
-        this.craftingPatternPartMachine = null;
+    public void invalidateStructure(@NotNull String name) {
+        super.invalidateStructure(name);
+        if (DEFAULT_STRUCTURE.equals(name)) {
+            this.craftingPatternPartMachine = null;
+        }
     }
 
-    private static int getHatchParallel(MetaMachine machine) {
-        if (machine instanceof IMultiController controller && controller.isFormed()) {
-            Optional<IParallelHatch> parallelHatch = controller.getParallelHatch();
-            if (parallelHatch.isPresent()) {
-                return Math.max(1, parallelHatch.get().getCurrentParallel());
-            }
-        }
-        return 1;
+    private int getHatchParallel() {
+        return getParallelHatch()
+                .map(hatch -> Math.max(1, hatch.getCurrentParallel()))
+                .orElse(1);
     }
 
     private GTRecipe getGTRecipe() {
         if (craftingPatternPartMachine == null) return null;
-        GTRecipe output = GTRecipeBuilder.ofRaw().buildRawRecipe();
-        List<Content> outputList = output.outputs.computeIfAbsent(ItemRecipeCapability.CAP, cap -> new ObjectArrayList<>());
-        long remain = getHatchParallel(this);
 
-        for (var it = Object2LongMaps.fastIterator(craftingPatternPartMachine.outputItems); it.hasNext() && remain > 0;) {
-            var entry = it.next();
+        GTRecipe output = GTRecipeBuilder.ofRaw().buildRawRecipe();
+        List<Content> outputList = output.outputs.computeIfAbsent(ItemRecipeCapability.CAP,
+                cap -> new ObjectArrayList<>());
+
+        long remain = getHatchParallel();
+
+        var iterator = Object2LongMaps.fastIterator(craftingPatternPartMachine.outputItems);
+        while (iterator.hasNext() && remain > 0) {
+            var entry = iterator.next();
             var key = entry.getKey();
             if (!(key.what() instanceof AEItemKey aeItemKey)) {
-                it.remove();
+                iterator.remove();
                 continue;
             }
 
@@ -80,27 +81,26 @@ public class LargeMolecularAssembler extends WorkableElectricMultiblockMachine {
 
             long totalItems = extract * key.amount();
 
-            var cont = new Content(
+            Content cont = new Content(
                     SizedIngredient.create(Ingredient.of(aeItemKey.getItem()), (int) totalItems),
                     ChanceLogic.getMaxChancedValue(),
-                    ChanceLogic.getMaxChancedValue(),
-                    0);
+                    ChanceLogic.getMaxChancedValue());
             outputList.add(cont);
 
             remain -= extract;
             multiply -= extract;
-            if (multiply == 0) it.remove();
-            else entry.setValue(multiply);
+            if (multiply == 0) {
+                iterator.remove();
+            } else {
+                entry.setValue(multiply);
+            }
         }
-        if (outputList.isEmpty()) return null;
-        else {
-            output.duration = this.tier * 10;
+
+        if (outputList.isEmpty()) {
+            return null;
+        } else {
+            output.duration = this.getTier() * 10;
             return output;
         }
-    }
-
-    @Override
-    protected @NotNull RecipeLogic createRecipeLogic(Object @NotNull... args) {
-        return new CustomRecipeLogic(this, this::getGTRecipe);
     }
 }
