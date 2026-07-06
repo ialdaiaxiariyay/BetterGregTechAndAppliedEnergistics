@@ -9,9 +9,9 @@ import com.gregtechceu.gtceu.api.machine.TickableSubscription;
 import com.gregtechceu.gtceu.api.machine.feature.IDataStickInteractable;
 import com.gregtechceu.gtceu.api.machine.mui.MachineUIPanelBuilder;
 import com.gregtechceu.gtceu.api.machine.multiblock.MultiblockControllerMachine;
-import com.gregtechceu.gtceu.api.machine.trait.NotifiableFluidTank;
-import com.gregtechceu.gtceu.api.machine.trait.NotifiableItemStackHandler;
-import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
+import com.gregtechceu.gtceu.api.machine.trait.notifiable.NotifiableFluidTank;
+import com.gregtechceu.gtceu.api.machine.trait.notifiable.NotifiableItemStackHandler;
+import com.gregtechceu.gtceu.api.machine.trait.recipe.RecipeHandlerList;
 import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient;
 import com.gregtechceu.gtceu.api.recipe.ingredient.SizedIngredient;
 import com.gregtechceu.gtceu.api.sync_system.annotations.SaveField;
@@ -157,7 +157,7 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
     private int[] circuitConfigurations = new int[MAX_PATTERN_COUNT];
 
     public ExtendMEPatternBufferPartMachine(BlockEntityCreationInfo info) {
-        super(info, IO.IN);
+        super(info, IO.IN,new NotifiableItemStackHandler(9, IO.IN, IO.NONE));
         patternInventory.setOnContentsChanged(() -> getSyncDataHolder().markClientSyncFieldDirty("patternInventory"));
         this.patternInventory.setFilter(stack -> stack.getItem() instanceof ProcessingPatternItem);
 
@@ -692,7 +692,7 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
                         Component.literal(customName),
                         Collections.emptyList());
             } else {
-                ItemStack circuitStack = isHasCircuitSlot() ? circuitInventory.storage.getStackInSlot(0) :
+                ItemStack circuitStack = circuitSlot.isEnabled() ? circuitSlot.storage.getStackInSlot(0) :
                         ItemStack.EMPTY;
                 int circuitConfiguration = circuitStack.isEmpty() ? -1 :
                         IntCircuitBehaviour.getCircuitConfiguration(circuitStack);
@@ -762,9 +762,7 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
         public InternalSlot(NotifiableItemStackHandler circuitInventory) {
             this.circuitInventory = circuitInventory;
             this.circuitInventory.setFilter(IntCircuitBehaviour::isIntegratedCircuit);
-            this.circuitInventory.storage.setOnContentsChanged(() -> {
-                InternalSlot.this.onContentsChanged();
-            });
+            this.circuitInventory.storage.setOnContentsChanged(InternalSlot.this::onContentsChanged);
         }
 
         public boolean isItemEmpty() {

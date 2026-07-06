@@ -3,7 +3,7 @@ package top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part;
 import com.gregtechceu.gtceu.api.blockentity.BlockEntityCreationInfo;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.machine.feature.IDataStickInteractable;
-import com.gregtechceu.gtceu.api.machine.feature.IHasCircuitSlot;
+import com.gregtechceu.gtceu.api.machine.trait.notifiable.NotifiableItemStackHandler;
 import com.gregtechceu.gtceu.common.item.behavior.IntCircuitBehaviour;
 import com.gregtechceu.gtceu.integration.ae2.gui.AEConfigWidget;
 import com.gregtechceu.gtceu.integration.ae2.machine.MEBusPartMachine;
@@ -40,7 +40,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class MEInputDualPartMachine extends MEBusPartMachine implements IDataStickInteractable, IHasCircuitSlot {
+public class MEInputDualPartMachine extends MEBusPartMachine implements IDataStickInteractable{
 
     protected static final int CONFIG_SIZE = 9;
 
@@ -48,7 +48,7 @@ public class MEInputDualPartMachine extends MEBusPartMachine implements IDataSti
     protected final ExportOnlyAEFluidList aeFluidHandler;
 
     public MEInputDualPartMachine(BlockEntityCreationInfo info) {
-        super(info, IO.IN);
+        super(info, IO.IN,new NotifiableItemStackHandler(9, IO.IN, IO.NONE));
         this.aeItemHandler = new ExportOnlyAEItemList(CONFIG_SIZE);
         this.aeFluidHandler = new ExportOnlyAEFluidList(this, CONFIG_SIZE);
     }
@@ -290,7 +290,7 @@ public class MEInputDualPartMachine extends MEBusPartMachine implements IDataSti
             }
         }
         tag.putByte("GhostCircuit",
-                (byte) IntCircuitBehaviour.getCircuitConfiguration(circuitInventory.getStackInSlot(0)));
+                (byte) IntCircuitBehaviour.getCircuitConfiguration(circuitSlot.storage.getStackInSlot(0)));
         tag.putBoolean("DistinctBuses", isDistinct());
         return tag;
     }
@@ -319,7 +319,7 @@ public class MEInputDualPartMachine extends MEBusPartMachine implements IDataSti
             }
         }
         if (tag.contains("GhostCircuit")) {
-            circuitInventory.setStackInSlot(0, IntCircuitBehaviour.stack(tag.getByte("GhostCircuit")));
+            circuitSlot.storage.setStackInSlot(0, IntCircuitBehaviour.stack(tag.getByte("GhostCircuit")));
         }
         if (tag.contains("DistinctBuses")) {
             setDistinct(tag.getBoolean("DistinctBuses"));

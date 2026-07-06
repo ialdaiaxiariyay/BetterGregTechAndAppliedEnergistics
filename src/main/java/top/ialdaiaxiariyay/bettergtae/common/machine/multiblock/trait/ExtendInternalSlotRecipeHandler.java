@@ -2,12 +2,13 @@ package top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.trait;
 
 import com.gregtechceu.gtceu.api.capability.recipe.*;
 import com.gregtechceu.gtceu.api.machine.trait.MachineTraitType;
-import com.gregtechceu.gtceu.api.machine.trait.NotifiableRecipeHandlerTrait;
-import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerGroupDistinctness;
-import com.gregtechceu.gtceu.api.machine.trait.RecipeHandlerList;
+import com.gregtechceu.gtceu.api.machine.trait.notifiable.NotifiableRecipeHandlerTrait;
+import com.gregtechceu.gtceu.api.machine.trait.recipe.RecipeHandlerGroupDistinctness;
+import com.gregtechceu.gtceu.api.machine.trait.recipe.RecipeHandlerList;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient;
 
+import com.gregtechceu.gtceu.integration.ae2.machine.MEPatternBufferPartMachine;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.fluids.FluidStack;
@@ -16,6 +17,7 @@ import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferPartMachine;
 import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferPartMachine.InternalSlot;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +42,7 @@ public final class ExtendInternalSlotRecipeHandler {
         private final SlotItemRecipeHandler itemRecipeHandler;
         private final SlotFluidRecipeHandler fluidRecipeHandler;
 
-        public SlotRHL(ExtendMEPatternBufferPartMachine buffer, InternalSlot slot, int idx) {
+        public SlotRHL(ExtendMEPatternBufferPartMachine buffer, ExtendMEPatternBufferPartMachine.InternalSlot slot, int idx) {
             super(IO.IN);
             itemRecipeHandler = buffer.attachTrait(new SlotItemRecipeHandler(slot, idx));
             fluidRecipeHandler = buffer.attachTrait(new SlotFluidRecipeHandler(slot, idx));
@@ -65,7 +67,7 @@ public final class ExtendInternalSlotRecipeHandler {
                 SlotItemRecipeHandler.class);
 
         @Override
-        public @NotNull MachineTraitType<SlotItemRecipeHandler> getTraitType() {
+        public MachineTraitType<SlotItemRecipeHandler> getTraitType() {
             return TYPE;
         }
 
@@ -92,7 +94,7 @@ public final class ExtendInternalSlotRecipeHandler {
         }
 
         @Override
-        public @NotNull List<Object> getContents() {
+        public List<Object> getContents() {
             return new ArrayList<>(slot.getItems());
         }
 

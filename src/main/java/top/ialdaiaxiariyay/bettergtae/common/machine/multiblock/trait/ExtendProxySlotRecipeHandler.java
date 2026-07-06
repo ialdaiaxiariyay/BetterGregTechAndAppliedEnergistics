@@ -2,6 +2,10 @@ package top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.trait;
 
 import com.gregtechceu.gtceu.api.capability.recipe.*;
 import com.gregtechceu.gtceu.api.machine.trait.*;
+import com.gregtechceu.gtceu.api.machine.trait.notifiable.NotifiableRecipeHandlerTrait;
+import com.gregtechceu.gtceu.api.machine.trait.recipe.IRecipeHandlerTrait;
+import com.gregtechceu.gtceu.api.machine.trait.recipe.RecipeHandlerGroupDistinctness;
+import com.gregtechceu.gtceu.api.machine.trait.recipe.RecipeHandlerList;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient;
 import com.gregtechceu.gtceu.utils.ISubscription;
@@ -32,11 +36,10 @@ public final class ExtendProxySlotRecipeHandler {
 
     public void updateProxy(ExtendMEPatternBufferPartMachine patternBuffer) {
         var slotHandlers = patternBuffer.getInternalRecipeHandler().getSlotHandlers();
-        var internalSlots = patternBuffer.getInternalInventory(); // 需新增 getter
         for (int i = 0; i < proxySlotHandlers.size(); ++i) {
             ProxyRHL proxyRHL = (ProxyRHL) proxySlotHandlers.get(i);
             ExtendInternalSlotRecipeHandler.SlotRHL slotRHL = (ExtendInternalSlotRecipeHandler.SlotRHL) slotHandlers.get(i);
-            proxyRHL.setBuffer(patternBuffer, slotRHL, internalSlots[i]);
+            proxyRHL.setBuffer(patternBuffer, slotRHL, patternBuffer.getInternalInventory()[i]);
         }
     }
 
@@ -67,7 +70,7 @@ public final class ExtendProxySlotRecipeHandler {
 
         public void setBuffer(ExtendMEPatternBufferPartMachine buffer,
                               ExtendInternalSlotRecipeHandler.SlotRHL slotRHL, ExtendMEPatternBufferPartMachine.InternalSlot internalSlot) {
-            circuit.setProxy(buffer.getCircuitInventory());
+            circuit.setProxy(internalSlot.getCircuitInventory());
             sharedItem.setProxy(buffer.getShareInventory());
             sharedFluid.setProxy(buffer.getShareTank());
             slotItem.setProxy(slotRHL.getItemRecipeHandler());
