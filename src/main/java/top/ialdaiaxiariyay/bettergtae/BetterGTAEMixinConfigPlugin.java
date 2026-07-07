@@ -1,6 +1,7 @@
 package top.ialdaiaxiariyay.bettergtae;
 
 import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.LoadingModList;
 
 import org.objectweb.asm.tree.ClassNode;
@@ -26,6 +27,9 @@ public class BetterGTAEMixinConfigPlugin implements IMixinConfigPlugin {
         if (mixinClassName.equals("top.ialdaiaxiariyay.bettergtae.mixin.ae.CraftingCPUClusterMixin")) {
             boolean shouldDisable = isModLoaded("mae2") || isModLoaded("extendedae_plus") || isModLoaded("bigger_ae2");
             return !shouldDisable;
+        }
+        if(mixinClassName.equals("top.ialdaiaxiariyay.bettergtae.mixin.mc.HashCacheMixin")){
+            return !FMLLoader.getLaunchHandler().isData();
         }
         return true;
     }
