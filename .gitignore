@@ -7,6 +7,7 @@ classes/
 .vscode/
 run/
 run-data/
+src/generated/resources/.cache/
 *.launch
 *.iml
 *.ipr
