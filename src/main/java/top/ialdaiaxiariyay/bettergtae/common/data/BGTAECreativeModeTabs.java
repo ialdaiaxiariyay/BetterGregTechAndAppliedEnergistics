@@ -1,13 +1,11 @@
 package top.ialdaiaxiariyay.bettergtae.common.data;
 
-import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
-import top.ialdaiaxiariyay.bettergtae.common.data.machine.BGTAEMachines;
-
 import com.gregtechceu.gtceu.common.data.GTCreativeModeTabs;
 
 import net.minecraft.world.item.CreativeModeTab;
 
 import com.tterrag.registrate.util.entry.RegistryEntry;
+import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
 
 import static top.ialdaiaxiariyay.bettergtae.api.registrate.BGTAERegistrate.REGISTRATE;
 
@@ -16,7 +14,8 @@ public class BGTAECreativeModeTabs {
     public static void init() {}
 
     public static RegistryEntry<CreativeModeTab> MACHINE = REGISTRATE.defaultCreativeTab("machine",
-            builder -> builder.displayItems(new GTCreativeModeTabs.RegistrateDisplayItemsGenerator("machine", REGISTRATE))
+            builder -> builder
+                    .displayItems(new GTCreativeModeTabs.RegistrateDisplayItemsGenerator("machine", REGISTRATE))
                     .icon(BGTAEMachines.EXTEND_ME_PATTERN_BUFFER::asStack)
                     .title(REGISTRATE.addLang("itemGroup", BetterGTAE.id("machine"),
                             BetterGTAE.NAME + " Machine Containers"))

@@ -12,7 +12,7 @@ import appeng.api.storage.StorageCells;
 import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
 import top.ialdaiaxiariyay.bettergtae.api.registrate.BGTAERegistrate;
 import top.ialdaiaxiariyay.bettergtae.common.data.BGTAECreativeModeTabs;
-import top.ialdaiaxiariyay.bettergtae.common.data.machine.BGTAEMachines;
+import top.ialdaiaxiariyay.bettergtae.common.data.BGTAEMachines;
 import top.ialdaiaxiariyay.bettergtae.common.item.InfinityCellGuiHandler;
 import top.ialdaiaxiariyay.bettergtae.common.item.InfinityCellHandler;
 

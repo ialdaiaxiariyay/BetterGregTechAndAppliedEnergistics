@@ -38,7 +38,8 @@ public final class ExtendProxySlotRecipeHandler {
         var slotHandlers = patternBuffer.getInternalRecipeHandler().getSlotHandlers();
         for (int i = 0; i < proxySlotHandlers.size(); ++i) {
             ProxyRHL proxyRHL = (ProxyRHL) proxySlotHandlers.get(i);
-            ExtendInternalSlotRecipeHandler.SlotRHL slotRHL = (ExtendInternalSlotRecipeHandler.SlotRHL) slotHandlers.get(i);
+            ExtendInternalSlotRecipeHandler.SlotRHL slotRHL = (ExtendInternalSlotRecipeHandler.SlotRHL) slotHandlers
+                    .get(i);
             proxyRHL.setBuffer(patternBuffer, slotRHL, patternBuffer.getInternalInventory()[i]);
         }
     }
@@ -69,7 +70,8 @@ public final class ExtendProxySlotRecipeHandler {
         }
 
         public void setBuffer(ExtendMEPatternBufferPartMachine buffer,
-                              ExtendInternalSlotRecipeHandler.SlotRHL slotRHL, ExtendMEPatternBufferPartMachine.InternalSlot internalSlot) {
+                              ExtendInternalSlotRecipeHandler.SlotRHL slotRHL,
+                              ExtendMEPatternBufferPartMachine.InternalSlot internalSlot) {
             circuit.setProxy(internalSlot.getCircuitInventory());
             sharedItem.setProxy(buffer.getShareInventory());
             sharedFluid.setProxy(buffer.getShareTank());

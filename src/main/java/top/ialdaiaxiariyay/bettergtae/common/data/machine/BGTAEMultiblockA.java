@@ -11,9 +11,8 @@ import com.gregtechceu.gtceu.common.data.GTRecipeTypes;
 
 import net.minecraft.network.chat.Component;
 
+import top.ialdaiaxiariyay.bettergtae.common.data.BGTAEMachines;
 import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.electric.LargeMolecularAssembler;
-
-import java.util.Objects;
 
 import static com.gregtechceu.gtceu.api.multiblock.Predicates.*;
 import static com.gregtechceu.gtceu.api.multiblock.util.RelativeDirection.*;
@@ -54,7 +53,8 @@ public class BGTAEMultiblockA {
                             .or(Predicates.abilities(PartAbility.EXPORT_ITEMS))
                             .or(Predicates.abilities(PartAbility.PARALLEL_HATCH)))
                     .where('F', Predicates.blocks(CASING_ASSEMBLY_LINE.get()))
-                    .where('G', Objects.requireNonNull(dataHatchPredicate()))
+                    .where('G',
+                            Predicates.blocks(CASING_STEEL_SOLID.get()).or(dataHatchPredicate()).setMaxGlobalLimited(2))
                     .build())
             .workableCasingModel(GTCEu.id("block/casings/solid/machine_casing_solid_steel"),
                     GTCEu.id("block/multiblock/assembly_line"))
@@ -68,7 +68,7 @@ public class BGTAEMultiblockA {
             .recipeModifiers(OC_NON_PERFECT, PARALLEL_HATCH)
             .appearanceBlock(CASING_ASSEMBLY_CONTROL)
             .tooltips(Component.translatable("bettergtae.machine.large_molecular_assembler.0"))
-            .pattern(definition -> MultiblockPatternBuilder.start()
+            .pattern(definition -> MultiblockPatternBuilder.start(FRONT, UP, RIGHT)
                     .slice("               ", "               ", "               ", "       A       ",
                             "      BBB      ", "   AAABBBAAA   ", "      BBB      ", "       A       ",
                             "               ", "               ", "               ")

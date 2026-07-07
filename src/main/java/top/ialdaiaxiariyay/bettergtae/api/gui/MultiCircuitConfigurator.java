@@ -1,7 +1,5 @@
 package top.ialdaiaxiariyay.bettergtae.api.gui;
 
-import brachy.modularui.api.drawable.Text;
-import brachy.modularui.widgets.slot.ItemSlot;
 import com.gregtechceu.gtceu.common.item.behavior.IntCircuitBehaviour;
 import com.gregtechceu.gtceu.common.mui.GTGuiTextures;
 import com.gregtechceu.gtceu.common.mui.widgets.PopupPanel;
@@ -12,6 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.items.ItemStackHandler;
 
 import brachy.modularui.api.drawable.IDrawable;
+import brachy.modularui.api.drawable.Text;
 import brachy.modularui.drawable.ItemDrawable;
 import brachy.modularui.screen.RichTooltip;
 import brachy.modularui.value.sync.PanelSyncManager;
@@ -21,6 +20,7 @@ import brachy.modularui.widget.Widget;
 import brachy.modularui.widgets.ButtonWidget;
 import brachy.modularui.widgets.layout.Flow;
 import brachy.modularui.widgets.layout.Grid;
+import brachy.modularui.widgets.slot.ItemSlot;
 
 import java.util.function.Consumer;
 

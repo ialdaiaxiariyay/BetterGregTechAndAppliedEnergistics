@@ -1,9 +1,5 @@
 package top.ialdaiaxiariyay.bettergtae.data.recipe;
 
-import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
-import top.ialdaiaxiariyay.bettergtae.common.data.machine.BGTAEMachines;
-import top.ialdaiaxiariyay.bettergtae.common.data.machine.BGTAEMultiblockA;
-
 import com.gregtechceu.gtceu.api.GTValues;
 import com.gregtechceu.gtceu.api.data.chemical.ChemicalHelper;
 import com.gregtechceu.gtceu.api.data.tag.TagPrefix;
@@ -18,13 +14,17 @@ import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.world.level.block.Blocks;
 
 import appeng.core.definitions.AEBlocks;
+import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
+import top.ialdaiaxiariyay.bettergtae.common.data.BGTAEMachines;
+import top.ialdaiaxiariyay.bettergtae.common.data.machine.BGTAEMultiblockA;
 
 import java.util.function.Consumer;
 
 public class VanillaRecipe {
 
     public static void init(Consumer<FinishedRecipe> consumer) {
-        VanillaRecipeHelper.addShapedRecipe(consumer, true, BetterGTAE.id("cleanroom_sterile_maintenance_hatch"), BGTAEMachines.STERILE_CLEANING_MAINTENANCE_HATCH.asStack(),
+        VanillaRecipeHelper.addShapedRecipe(consumer, true, BetterGTAE.id("cleanroom_sterile_maintenance_hatch"),
+                BGTAEMachines.STERILE_CLEANING_MAINTENANCE_HATCH.asStack(),
                 "ABA",
                 "CDC",
                 "EAE",
@@ -34,7 +34,8 @@ public class VanillaRecipe {
                 'D', GTBlocks.FILTER_CASING_STERILE.asStack(),
                 'E', ChemicalHelper.get(TagPrefix.cableGtSingle, GTMaterials.Europium));
 
-        VanillaRecipeHelper.addShapedRecipe(consumer, true, BetterGTAE.id("large_molecular_assembler"), BGTAEMultiblockA.LARGE_MOLECULAR_ASSEMBLER.asStack(),
+        VanillaRecipeHelper.addShapedRecipe(consumer, true, BetterGTAE.id("large_molecular_assembler"),
+                BGTAEMultiblockA.LARGE_MOLECULAR_ASSEMBLER.asStack(),
                 "ABA",
                 "CDC",
                 "ABA",
@@ -43,7 +44,8 @@ public class VanillaRecipe {
                 'C', CustomTags.IV_CIRCUITS,
                 'D', Blocks.CRAFTING_TABLE.asItem());
 
-        VanillaRecipeHelper.addShapedRecipe(consumer, true, BetterGTAE.id("crafting_pattern_hatch"), BGTAEMachines.CRAFTING_PATTERN_HATCH.asStack(),
+        VanillaRecipeHelper.addShapedRecipe(consumer, true, BetterGTAE.id("crafting_pattern_hatch"),
+                BGTAEMachines.CRAFTING_PATTERN_HATCH.asStack(),
                 "ABA",
                 "BCB",
                 "ABA",

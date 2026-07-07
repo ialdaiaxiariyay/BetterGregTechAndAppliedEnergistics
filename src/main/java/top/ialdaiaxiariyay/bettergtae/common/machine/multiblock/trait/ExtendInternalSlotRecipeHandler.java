@@ -8,7 +8,6 @@ import com.gregtechceu.gtceu.api.machine.trait.recipe.RecipeHandlerList;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient;
 
-import com.gregtechceu.gtceu.integration.ae2.machine.MEPatternBufferPartMachine;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.fluids.FluidStack;
@@ -17,7 +16,6 @@ import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferPartMachine;
 import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferPartMachine.InternalSlot;
-
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +40,8 @@ public final class ExtendInternalSlotRecipeHandler {
         private final SlotItemRecipeHandler itemRecipeHandler;
         private final SlotFluidRecipeHandler fluidRecipeHandler;
 
-        public SlotRHL(ExtendMEPatternBufferPartMachine buffer, ExtendMEPatternBufferPartMachine.InternalSlot slot, int idx) {
+        public SlotRHL(ExtendMEPatternBufferPartMachine buffer, ExtendMEPatternBufferPartMachine.InternalSlot slot,
+                       int idx) {
             super(IO.IN);
             itemRecipeHandler = buffer.attachTrait(new SlotItemRecipeHandler(slot, idx));
             fluidRecipeHandler = buffer.attachTrait(new SlotFluidRecipeHandler(slot, idx));

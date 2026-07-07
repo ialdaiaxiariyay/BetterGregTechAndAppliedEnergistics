@@ -5,11 +5,11 @@ import com.gregtechceu.gtceu.api.mui.IItemUIHolder;
 import com.gregtechceu.gtceu.api.multiblock.util.RelativeDirection;
 import com.gregtechceu.gtceu.common.mui.GTGuiTextures;
 
+import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -31,7 +31,12 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
+import javax.annotation.ParametersAreNonnullByDefault;
+
+@ParametersAreNonnullByDefault
+@MethodsReturnNonnullByDefault
 public class StructureWriteBehavior implements IItemUIHolder {
 
     public static final StructureWriteBehavior INSTANCE = new StructureWriteBehavior();
@@ -40,30 +45,23 @@ public class StructureWriteBehavior implements IItemUIHolder {
 
     @Override
     public ModularPanel<?> buildUI(PlayerInventoryGuiData<?> data, PanelSyncManager syncManager, UISettings settings) {
-        // 使用 ModularPanel 构建 UI
         var panel = new ModularPanel<>("structure_writer")
-                .size(176, 120)
+                .size(176 + 18, 120 + 16)
                 .background(GTGuiTextures.BACKGROUND);
 
-        // 主容器（类似 WidgetGroup）
         var container = new ParentWidget<>()
-                .size(200, 200)
+                .size(176, 120)
                 .pos(8, 8)
                 .background(GTGuiTextures.BACKGROUND_INVERSE);
 
-        // 显示坐标信息
         container.addChild(Text.dynamic(() -> {
             var pos = getPos(data.getUsedItemStack());
-            if (pos != null) {
-                int x = 1 + pos[1].getX() - pos[0].getX();
-                int y = 1 + pos[1].getY() - pos[0].getY();
-                int z = 1 + pos[1].getZ() - pos[0].getZ();
-                return Component.literal(String.format("Structural scale: X:%d Y:%d Z:%d", x, y, z));
-            }
-            return Component.literal("No structure selected");
+            int x = 1 + pos[1].getX() - pos[0].getX();
+            int y = 1 + pos[1].getY() - pos[0].getY();
+            int z = 1 + pos[1].getZ() - pos[0].getZ();
+            return Component.literal(String.format("Structural scale: X:%d Y:%d Z:%d", x, y, z));
         }).asWidget().pos(7, 7).color(0xFAF9F6), -1);
 
-        // 显示方向信息
         container.addChild(Text.dynamic(() -> {
             var dir = getDir(data.getUsedItemStack());
             var dirs = DebugBlockPattern.getDir(dir);
@@ -71,7 +69,6 @@ public class StructureWriteBehavior implements IItemUIHolder {
                     String.format("Export order: C:%s S:%s A:%s", dirs[0].name(), dirs[1].name(), dirs[2].name()));
         }).asWidget().pos(7, 20).color(0xFAF9F6), -1);
 
-        // Export 按钮
         container.addChild(
                 new ButtonWidget<>()
                         .size(158, 20)
@@ -84,7 +81,6 @@ public class StructureWriteBehavior implements IItemUIHolder {
                         }),
                 -1);
 
-        // Rotate X axis 按钮
         container.addChild(
                 new ButtonWidget<>()
                         .size(77, 20)
@@ -97,7 +93,6 @@ public class StructureWriteBehavior implements IItemUIHolder {
                         }),
                 -1);
 
-        // Rotate Y axis 按钮
         container.addChild(
                 new ButtonWidget<>()
                         .size(77, 20)
@@ -115,75 +110,72 @@ public class StructureWriteBehavior implements IItemUIHolder {
     }
 
     private void export(PlayerInventoryGuiData<?> playerInventoryHolder) {
-        if (getPos(playerInventoryHolder.getUsedItemStack()) != null &&
-                playerInventoryHolder.getPlayer() instanceof ServerPlayer) {
-            BlockPos[] blockPos = getPos(playerInventoryHolder.getUsedItemStack());
-            Direction direction = getDir(playerInventoryHolder.getUsedItemStack());
-            StringBuilder builder = new StringBuilder();
-            DebugBlockPattern blockPattern;
-            if (blockPos != null) {
-                blockPattern = new DebugBlockPattern(
-                        playerInventoryHolder.getPlayer().level(),
-                        blockPos[0].getX(),
-                        blockPos[0].getY(),
-                        blockPos[0].getZ(),
-                        blockPos[1].getX(),
-                        blockPos[1].getY(),
-                        blockPos[1].getZ());
-                RelativeDirection[] dirs = DebugBlockPattern.getDir(direction);
-                blockPattern.changeDir(dirs[0], dirs[1], dirs[2]);
-                builder.append(".pattern(definition -> FactoryBlockPattern.start()\n");
-                for (int i = 0; i < blockPattern.pattern.length; i++) {
-                    String[] strings = blockPattern.pattern[i];
-                    builder.append(".aisle(\"%s\")\n".formatted(Joiner.on("\", \"").join(strings)));
-                }
-                builder.append(".where(\"~\", Predicates.controller(Predicates.blocks(definition.get())))\n");
-                blockPattern.legend.forEach((b, c) -> {
-                    if (c.equals(' ')) return;
-                    builder.append(".where(\"").append(c).append("\", Predicates.blocks(RegistriesUtil.getBlock(\"")
-                            .append(RegistriesUtil.BlockId(b)).append("\")))\n");
-                });
-            }
-            String target = ".where(\"~\", Predicates.blocks(Registries.getBlock(\"minecraft:oak_log\")))";
-            int startIndex = builder.indexOf(target);
-            if (startIndex != -1) {
-                int endIndex = startIndex + target.length() + 1;
-                builder.delete(startIndex, endIndex);
-            }
-            LocalDateTime now = LocalDateTime.now();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
-            String fileName = now.format(formatter) + ".txt";
-            File logDir = new File("logs/bp");
-            if (!logDir.exists()) {
-                logDir.mkdirs();
-            }
-            File logFile = new File(logDir, fileName);
-            try (BufferedWriter writer = new BufferedWriter(new FileWriter(logFile))) {
-                writer.write(builder.toString());
-            } catch (IOException e) {
-                BetterGTAE.LOGGER.error("Error writing to log file: " + e.getMessage());
-            }
+        var player = playerInventoryHolder.getPlayer();
+
+        var stack = playerInventoryHolder.getUsedItemStack();
+        BlockPos[] blockPos = getPos(stack);
+
+        Direction direction = getDir(stack);
+        StringBuilder builder = new StringBuilder();
+        DebugBlockPattern blockPattern;
+
+        blockPattern = new DebugBlockPattern(
+                player.level(),
+                blockPos[0].getX(), blockPos[0].getY(), blockPos[0].getZ(),
+                blockPos[1].getX(), blockPos[1].getY(), blockPos[1].getZ());
+        RelativeDirection[] dirs = DebugBlockPattern.getDir(direction);
+        blockPattern.changeDir(dirs[0], dirs[1], dirs[2]);
+
+        builder.append(".pattern(definition -> FactoryBlockPattern.start()\n");
+        for (int i = 0; i < blockPattern.pattern.length; i++) {
+            String[] strings = blockPattern.pattern[i];
+            builder.append(".aisle(\"%s\")\n".formatted(Joiner.on("\", \"").join(strings)));
+        }
+        builder.append(".where(\"~\", Predicates.controller(Predicates.blocks(definition.get())))\n");
+        blockPattern.legend.forEach((b, c) -> {
+            if (c.equals(' ')) return;
+            builder.append(".where(\"").append(c).append("\", Predicates.blocks(RegistriesUtil.getBlock(\"")
+                    .append(RegistriesUtil.BlockId(b)).append("\")))\n");
+        });
+
+        String target = ".where(\"~\", Predicates.blocks(Registries.getBlock(\"minecraft:oak_log\")))";
+        int startIndex = builder.indexOf(target);
+        if (startIndex != -1) {
+            int endIndex = startIndex + target.length() + 1;
+            builder.delete(startIndex, endIndex);
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss");
+        String fileName = now.format(formatter) + ".txt";
+        File logDir = new File("logs/bp");
+        if (!logDir.exists()) {
+            logDir.mkdirs();
+        }
+        File logFile = new File(logDir, fileName);
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(logFile))) {
+            writer.write(builder.toString());
+            player.sendSystemMessage(Component.literal("Structure exported to " + logFile.getAbsolutePath()));
+        } catch (IOException e) {
+            BetterGTAE.LOGGER.error("Error writing to log file: {}", e.getMessage());
+            player.sendSystemMessage(Component.literal("Export failed: " + e.getMessage()));
         }
     }
 
     private void changeDirX(PlayerInventoryGuiData<?> playerInventoryHolder) {
-        if (getPos(playerInventoryHolder.getUsedItemStack()) != null &&
-                playerInventoryHolder.getPlayer() instanceof ServerPlayer) {
-            ItemStack itemStack = playerInventoryHolder.getUsedItemStack();
-            Direction direction = getDir(itemStack);
-            direction = direction.getClockWise(Direction.Axis.X);
-            setDir(itemStack, direction);
-        }
+        getPos(playerInventoryHolder.getUsedItemStack());
+        ItemStack itemStack = playerInventoryHolder.getUsedItemStack();
+        Direction direction = getDir(itemStack);
+        direction = direction.getClockWise(Direction.Axis.X);
+        setDir(itemStack, direction);
     }
 
     private void changeDirY(PlayerInventoryGuiData<?> playerInventoryHolder) {
-        if (getPos(playerInventoryHolder.getUsedItemStack()) != null &&
-                playerInventoryHolder.getPlayer() instanceof ServerPlayer) {
-            ItemStack itemStack = playerInventoryHolder.getUsedItemStack();
-            Direction direction = getDir(itemStack);
-            direction = direction.getClockWise(Direction.Axis.Y);
-            setDir(itemStack, direction);
-        }
+        getPos(playerInventoryHolder.getUsedItemStack());
+        ItemStack itemStack = playerInventoryHolder.getUsedItemStack();
+        Direction direction = getDir(itemStack);
+        direction = direction.getClockWise(Direction.Axis.Y);
+        setDir(itemStack, direction);
     }
 
     public static boolean isItemStructureWriter(ItemStack stack) {
@@ -198,7 +190,7 @@ public class StructureWriteBehavior implements IItemUIHolder {
     public static Direction getDir(ItemStack stack) {
         CompoundTag tag = stack.getOrCreateTagElement("structure_writer");
         if (!tag.contains("dir")) return Direction.WEST;
-        return Direction.byName(tag.getString("dir"));
+        return Objects.requireNonNull(Direction.byName(tag.getString("dir")));
     }
 
     public static void setDir(ItemStack stack, Direction dir) {

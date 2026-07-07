@@ -1,6 +1,5 @@
 package top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part;
 
-import brachy.modularui.widget.Widget;
 import com.gregtechceu.gtceu.api.blockentity.BlockEntityCreationInfo;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.machine.MetaMachine;
@@ -67,6 +66,7 @@ import brachy.modularui.value.sync.BooleanSyncValue;
 import brachy.modularui.value.sync.PanelSyncManager;
 import brachy.modularui.value.sync.SyncHandlers;
 import brachy.modularui.widget.ParentWidget;
+import brachy.modularui.widget.Widget;
 import brachy.modularui.widgets.ButtonWidget;
 import brachy.modularui.widgets.layout.Flow;
 import brachy.modularui.widgets.layout.Grid;
@@ -157,19 +157,19 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
     private int[] circuitConfigurations = new int[MAX_PATTERN_COUNT];
 
     public ExtendMEPatternBufferPartMachine(BlockEntityCreationInfo info) {
-        super(info, IO.IN,new NotifiableItemStackHandler(9, IO.IN, IO.NONE));
+        super(info, IO.IN, new NotifiableItemStackHandler(9, IO.IN, IO.NONE));
         patternInventory.setOnContentsChanged(() -> getSyncDataHolder().markClientSyncFieldDirty("patternInventory"));
         this.patternInventory.setFilter(stack -> stack.getItem() instanceof ProcessingPatternItem);
 
         for (int i = 0; i < this.internalInventory.length; i++) {
             NotifiableItemStackHandler circuitInv = attachTrait(
                     new NotifiableItemStackHandler(1, IO.IN, IO.NONE) {
+
                         @Override
                         public void onContentsChanged() {
                             super.onContentsChanged();
                         }
-                    }
-            );
+                    });
             circuitInv.setFilter(IntCircuitBehaviour::isIntegratedCircuit);
             InternalSlot slot = new InternalSlot(circuitInv);
             circuitInv.storage.setOnContentsChanged(slot::onContentsChanged);
@@ -360,8 +360,8 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
                 (syncManager1, panelHandler) -> PopupPanel.createPopupPanel("shared_fluids_panel", 85, 86)
                         .child(Text.lang("gui.gtceu.share_tank.title").asWidget().margin(4))
                         .child(GTMuiMachineUtil.createSlotGroupFromInventory(syncManager1, shareTank,
-                                        "shared_fluid_slots", 16, 'F',
-                                        GTMuiMachineUtil.createSquareMatrix(16, 'F'))   // 4x4 矩阵，共 16 格
+                                "shared_fluid_slots", 16, 'F',
+                                GTMuiMachineUtil.createSquareMatrix(16, 'F'))   // 4x4 矩阵，共 16 格
                                 .top(26)
                                 .leftRel(0.5f)));
 
@@ -382,7 +382,7 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
                     popup.child(Text.lang("bettergtae.gui.circuit.picker.title", slotIndex + 1)
                             .asWidget().posRel(0.5f, 0.05f).size(160, 16));
                     popup.child(Text.dynamic(() -> Component.translatable("bettergtae.gui.circuit.current_value",
-                                    getCircuitConfiguration(slotIndex)))
+                            getCircuitConfiguration(slotIndex)))
                             .asWidget().posRel(0.5f, 0.12f).size(160, 12));
 
                     // 数字网格（0~32）
@@ -447,7 +447,8 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
                             .leftRel(0.5f)
                             .gridOfSizeWidth(MAX_PATTERN_COUNT, 9, (x, y, index) -> {
                                 if (index >= MAX_PATTERN_COUNT) return new Widget<>().size(18, 18);
-                                return createCircuitButton(index, mainSyncManager, selectedCircuitSlot, circuitPickerHandler);
+                                return createCircuitButton(index, mainSyncManager, selectedCircuitSlot,
+                                        circuitPickerHandler);
                             });
 
                     popup.child(grid.topRel(0.2f));
@@ -503,10 +504,10 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
                             }
                             return false;
                         })
-                        .overlay(new DynamicDrawable(() -> canRefundValue.getBoolValue()
-                                ? GTGuiTextures.REFUND_OVERLAY.asIcon().size(16)
-                                : new DrawableStack(GTGuiTextures.REFUND_OVERLAY, new ItemDrawable(Items.BARRIER))
-                                .asIcon().size(16)))
+                        .overlay(new DynamicDrawable(
+                                () -> canRefundValue.getBoolValue() ? GTGuiTextures.REFUND_OVERLAY.asIcon().size(16) :
+                                        new DrawableStack(GTGuiTextures.REFUND_OVERLAY, new ItemDrawable(Items.BARRIER))
+                                                .asIcon().size(16)))
                         .tooltip(new RichTooltip().addLine(Text.lang("gui.gtceu.refund_all.desc"))))
                 .child(new ButtonWidget<>()
                         .size(18)
@@ -529,9 +530,9 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
                             return false;
                         })
                         .overlay(GTGuiTextures.INT_CIRCUIT_OVERLAY.asIcon().size(16))
-                        .tooltip(new RichTooltip().add(Component.translatable("bettergtae.gui.circuit.configurator.tooltip")))));
+                        .tooltip(new RichTooltip()
+                                .add(Component.translatable("bettergtae.gui.circuit.configurator.tooltip")))));
     }
-
 
     @Override
     public void buildMainUI(ParentWidget<?> mainWidget, PosGuiData guiData, PanelSyncManager syncManager,
@@ -992,7 +993,7 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
             if (circuitInventory != null) {
                 tag.put("circuitInventory", circuitInventory.storage.serializeNBT());
             }
-            
+
             return tag;
         }
 

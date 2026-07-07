@@ -1,11 +1,5 @@
 package top.ialdaiaxiariyay.bettergtae.data.recipe;
 
-import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
-import top.ialdaiaxiariyay.bettergtae.common.data.BGTAEBlocks;
-import top.ialdaiaxiariyay.bettergtae.common.data.BGTAEItems;
-import top.ialdaiaxiariyay.bettergtae.common.data.machine.BGTAEMachines;
-import top.ialdaiaxiariyay.bettergtae.common.data.machine.BGTAEMultiblockA;
-
 import com.gregtechceu.gtceu.api.data.tag.TagPrefix;
 import com.gregtechceu.gtceu.common.data.GTBlocks;
 import com.gregtechceu.gtceu.common.data.GTItems;
@@ -19,6 +13,11 @@ import net.minecraft.data.recipes.FinishedRecipe;
 
 import appeng.core.definitions.AEBlocks;
 import appeng.core.definitions.AEItems;
+import top.ialdaiaxiariyay.bettergtae.BetterGTAE;
+import top.ialdaiaxiariyay.bettergtae.common.data.BGTAEBlocks;
+import top.ialdaiaxiariyay.bettergtae.common.data.BGTAEItems;
+import top.ialdaiaxiariyay.bettergtae.common.data.BGTAEMachines;
+import top.ialdaiaxiariyay.bettergtae.common.data.machine.BGTAEMultiblockA;
 
 import java.util.function.Consumer;
 

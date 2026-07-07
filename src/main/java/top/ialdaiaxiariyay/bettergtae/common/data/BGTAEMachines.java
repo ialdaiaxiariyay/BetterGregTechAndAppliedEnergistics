@@ -1,4 +1,4 @@
-package top.ialdaiaxiariyay.bettergtae.common.data.machine;
+package top.ialdaiaxiariyay.bettergtae.common.data;
 
 import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.api.data.RotationState;
@@ -10,7 +10,7 @@ import com.gregtechceu.gtceu.common.machine.multiblock.part.CleaningMaintenanceH
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 
-import top.ialdaiaxiariyay.bettergtae.common.data.BGTAECreativeModeTabs;
+import top.ialdaiaxiariyay.bettergtae.common.data.machine.BGTAEMultiblockA;
 import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.CraftingPatternPartMachine;
 import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferPartMachine;
 import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPatternBufferProxyPartMachine;

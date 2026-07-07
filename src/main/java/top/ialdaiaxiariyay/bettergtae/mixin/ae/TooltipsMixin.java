@@ -1,7 +1,5 @@
 package top.ialdaiaxiariyay.bettergtae.mixin.ae;
 
-import top.ialdaiaxiariyay.bettergtae.utils.NumberUtil;
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.MutableComponent;
 
@@ -10,6 +8,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import top.ialdaiaxiariyay.bettergtae.utils.NumberUtil;
 
 @Mixin(Tooltips.class)
 public abstract class TooltipsMixin {

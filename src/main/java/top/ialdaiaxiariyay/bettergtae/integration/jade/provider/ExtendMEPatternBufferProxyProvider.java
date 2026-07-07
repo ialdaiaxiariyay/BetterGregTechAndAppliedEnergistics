@@ -1,6 +1,5 @@
 package top.ialdaiaxiariyay.bettergtae.integration.jade.provider;
 
-import com.gregtechceu.gtceu.GTCEu;
 import com.gregtechceu.gtceu.client.util.TooltipHelper;
 import com.gregtechceu.gtceu.integration.jade.provider.MachineInfoProvider;
 

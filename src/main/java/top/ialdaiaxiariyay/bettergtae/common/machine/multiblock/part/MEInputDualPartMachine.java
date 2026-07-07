@@ -40,7 +40,7 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
-public class MEInputDualPartMachine extends MEBusPartMachine implements IDataStickInteractable{
+public class MEInputDualPartMachine extends MEBusPartMachine implements IDataStickInteractable {
 
     protected static final int CONFIG_SIZE = 9;
 
@@ -48,7 +48,7 @@ public class MEInputDualPartMachine extends MEBusPartMachine implements IDataSti
     protected final ExportOnlyAEFluidList aeFluidHandler;
 
     public MEInputDualPartMachine(BlockEntityCreationInfo info) {
-        super(info, IO.IN,new NotifiableItemStackHandler(9, IO.IN, IO.NONE));
+        super(info, IO.IN, new NotifiableItemStackHandler(9, IO.IN, IO.NONE));
         this.aeItemHandler = new ExportOnlyAEItemList(CONFIG_SIZE);
         this.aeFluidHandler = new ExportOnlyAEFluidList(this, CONFIG_SIZE);
     }
@@ -157,8 +157,8 @@ public class MEInputDualPartMachine extends MEBusPartMachine implements IDataSti
         var flow = Flow.col().coverChildren();
 
         flow.child(Text.dynamic(() -> isOnlineValue.getBoolValue() ?
-                        Component.translatable("gtceu.gui.me_network.online") :
-                        Component.translatable("gtceu.gui.me_network.offline"))
+                Component.translatable("gtceu.gui.me_network.online") :
+                Component.translatable("gtceu.gui.me_network.offline"))
                 .asWidget().marginTop(2).marginBottom(4));
 
         // 计算合适宽度：9个槽位 × 18px = 162px，留出边距
