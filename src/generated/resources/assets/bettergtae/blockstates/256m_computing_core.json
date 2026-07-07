@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "formed=false": {
+      "model": "bettergtae:block/crafting/256m_computing_core"
+    },
+    "formed=true": {
+      "model": "bettergtae:block/crafting/256m_computing_core_formed"
+    }
+  }
+}

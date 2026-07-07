@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "bettergtae:block/machine/extend_me_pattern_buffer_proxy",
+      "x": 90
+    },
+    "facing=east": {
+      "model": "bettergtae:block/machine/extend_me_pattern_buffer_proxy",
+      "y": 90
+    },
+    "facing=north": {
+      "model": "bettergtae:block/machine/extend_me_pattern_buffer_proxy"
+    },
+    "facing=south": {
+      "model": "bettergtae:block/machine/extend_me_pattern_buffer_proxy",
+      "y": 180
+    },
+    "facing=up": {
+      "gtceu:z": 180,
+      "model": "bettergtae:block/machine/extend_me_pattern_buffer_proxy",
+      "x": 270
+    },
+    "facing=west": {
+      "model": "bettergtae:block/machine/extend_me_pattern_buffer_proxy",
+      "y": 270
+    }
+  }
+}

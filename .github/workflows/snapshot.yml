@@ -32,9 +32,6 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x gradlew
 
-      - name: Run Datagen
-        run: ./gradlew runData
-
       - name: Publish Snapshot to GitHub Packages
         run: ./gradlew publish
         env:

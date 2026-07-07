@@ -1,0 +1,41 @@
+{
+  "parent": "minecraft:block/block",
+  "elements": [
+    {
+      "faces": {
+        "down": {
+          "texture": "#light"
+        },
+        "east": {
+          "texture": "#light"
+        },
+        "north": {
+          "texture": "#light"
+        },
+        "south": {
+          "texture": "#light"
+        },
+        "up": {
+          "texture": "#light"
+        },
+        "west": {
+          "texture": "#light"
+        }
+      },
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ]
+    }
+  ],
+  "textures": {
+    "light": "bettergtae:block/crafting/max_computing_core_light",
+    "particle": "bettergtae:block/crafting/max_computing_core"
+  }
+}
