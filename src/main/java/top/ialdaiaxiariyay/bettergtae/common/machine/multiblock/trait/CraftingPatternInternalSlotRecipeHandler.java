@@ -6,11 +6,9 @@ import com.gregtechceu.gtceu.api.machine.trait.notifiable.NotifiableRecipeHandle
 import com.gregtechceu.gtceu.api.machine.trait.recipe.RecipeHandlerGroupDistinctness;
 import com.gregtechceu.gtceu.api.machine.trait.recipe.RecipeHandlerList;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
-import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient;
 
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraftforge.fluids.FluidStack;
 
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
@@ -38,14 +36,12 @@ public final class CraftingPatternInternalSlotRecipeHandler {
     protected static class SlotRHL extends RecipeHandlerList {
 
         private final SlotItemRecipeHandler itemRecipeHandler;
-        private final SlotFluidRecipeHandler fluidRecipeHandler;
 
         public SlotRHL(CraftingPatternPartMachine buffer, CraftingPatternPartMachine.InternalSlot slot, int idx) {
             super(IO.IN);
             itemRecipeHandler = buffer.attachTrait(new SlotItemRecipeHandler(slot, idx));
-            fluidRecipeHandler = buffer.attachTrait(new SlotFluidRecipeHandler(slot, idx));
-            addHandlers(buffer.getCircuitSlot(), buffer.getShareInventory(), buffer.getShareTank(),
-                    itemRecipeHandler, fluidRecipeHandler);
+            addHandlers(buffer.getCircuitSlot(),
+                    itemRecipeHandler);
             this.setGroup(RecipeHandlerGroupDistinctness.BUS_DISTINCT);
         }
 
@@ -88,7 +84,7 @@ public final class CraftingPatternInternalSlotRecipeHandler {
         public @NotNull List<Ingredient> handleRecipeInner(IO io, GTRecipe recipe, List<Ingredient> left,
                                                            boolean simulate) {
             if (io != IO.IN || slot.isItemEmpty()) return left;
-            return slot.handleItemInternal(left, simulate);
+            return Objects.requireNonNull(slot.handleItemInternal(left, simulate));
         }
 
         @Override
@@ -99,50 +95,6 @@ public final class CraftingPatternInternalSlotRecipeHandler {
         @Override
         public double getTotalContentAmount() {
             return slot.getItems().stream().mapToLong(ItemStack::getCount).sum();
-        }
-    }
-
-    @Getter
-    private static class SlotFluidRecipeHandler extends NotifiableRecipeHandlerTrait<FluidIngredient> {
-
-        public static final MachineTraitType<SlotFluidRecipeHandler> TYPE = new MachineTraitType<>(
-                SlotFluidRecipeHandler.class);
-
-        @Override
-        public @NotNull MachineTraitType<SlotFluidRecipeHandler> getTraitType() {
-            return TYPE;
-        }
-
-        private final CraftingPatternPartMachine.InternalSlot slot;
-        private final int priority;
-
-        private final int size = 81;
-        private final RecipeCapability<FluidIngredient> capability = FluidRecipeCapability.CAP;
-        private final IO handlerIO = IO.IN;
-        private final boolean isDistinct = true;
-
-        private SlotFluidRecipeHandler(CraftingPatternPartMachine.InternalSlot slot, int index) {
-            super();
-            this.slot = slot;
-            this.priority = IFilteredHandler.HIGH + index + 1;
-            slot.setOnContentsChanged(this::notifyListeners);
-        }
-
-        @Override
-        public @NotNull List<FluidIngredient> handleRecipeInner(IO io, GTRecipe recipe, List<FluidIngredient> left,
-                                                                boolean simulate) {
-            if (io != IO.IN || slot.isFluidEmpty()) return left;
-            return Objects.requireNonNull(slot.handleFluidInternal(left, simulate));
-        }
-
-        @Override
-        public @NotNull List<Object> getContents() {
-            return new ArrayList<>(slot.getFluids());
-        }
-
-        @Override
-        public double getTotalContentAmount() {
-            return slot.getFluids().stream().mapToLong(FluidStack::getAmount).sum();
         }
     }
 }

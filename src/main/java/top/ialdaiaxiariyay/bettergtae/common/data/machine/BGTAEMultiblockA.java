@@ -34,7 +34,7 @@ public class BGTAEMultiblockA {
             .appearanceBlock(CASING_STEEL_SOLID)
             .tooltips(Component.translatable("bettergtae.machine.advanced_assembly_line.0"))
             .tooltips(Component.translatable("bettergtae.machine.advanced_assembly_line.1"))
-            .pattern(definition -> MultiblockPatternBuilder.start(BACK, UP, RIGHT)
+            .pattern(definition -> MultiblockPatternBuilder.start(RIGHT, UP, BACK)
                     .slice("       ", " AAAAAA", " BCCCCC", " AAAAAA", "       ")
                     .slice(" AAAAAA", "BADDDDD", "BACCCCC", "BABBBBB", " AAAAAA")
                     .slice(" BGEEEE", "BAAAAAA", "~FFFFFF", "BAAAAAA", " BGEEEE")

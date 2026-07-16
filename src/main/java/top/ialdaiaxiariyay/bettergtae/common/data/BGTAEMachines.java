@@ -17,6 +17,7 @@ import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.ExtendMEPat
 import top.ialdaiaxiariyay.bettergtae.common.machine.multiblock.part.MEInputDualPartMachine;
 
 import static com.gregtechceu.gtceu.api.GTValues.*;
+import static com.gregtechceu.gtceu.api.machine.property.GTMachineModelProperties.IS_FORMED;
 import static top.ialdaiaxiariyay.bettergtae.api.registrate.BGTAERegistrate.REGISTRATE;
 
 public class BGTAEMachines {
@@ -89,6 +90,7 @@ public class BGTAEMachines {
                         .translatable(CleanroomType.STERILE_CLEANROOM.getTranslationKey())
                         .withStyle(ChatFormatting.GREEN)));
             })
+            .modelProperty(IS_FORMED, false)
             .overlayTieredHullModel(GTCEu.id("block/machine/part/cleaning_maintenance_hatch"))
             .tier(ZPM)
             .register();

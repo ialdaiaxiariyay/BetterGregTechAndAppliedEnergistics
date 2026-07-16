@@ -5,7 +5,8 @@ mui = "3.3.1-SNAPSHOT"
 kubejs_version = "2001.6.4-build.120+forge"
 configuration_version = "3.1.0-forge"
 jei_version = "15.20.0.115"
-emi_version = "1.1.22+1.20.1"
+emi_version = "1.1.24+1.20.1"
+emi_accelerator_version = "6oY5A4Iy" # 1.0.1
 mixinextras_version = "0.5.0-rc.3"
 jade_version = "11.12.3+forge"
 architectury_version = "9.1.12"
@@ -25,6 +26,7 @@ jei-common-api = { module = "mezz.jei:jei-1.20.1-common-api", version.ref = "jei
 jei-forge-api = { module = "mezz.jei:jei-1.20.1-forge-api", version.ref = "jei_version" }
 jei-forge-impl = { module = "mezz.jei:jei-1.20.1-forge", version.ref = "jei_version" }
 emi = { module = "dev.emi:emi-forge", version.ref = "emi_version" }
+emi_accelerator = { module = "maven.modrinth:emiaccelerator", version.ref = "emi_accelerator_version" }
 
 mui = { module = "brachy.modularui:modularui-mc1.20.1", version.ref = "mui" }
 gtceu = { module = "com.gregtechceu.gtceu:gtceu-1.20.1", version.ref = "gtceu_version" }

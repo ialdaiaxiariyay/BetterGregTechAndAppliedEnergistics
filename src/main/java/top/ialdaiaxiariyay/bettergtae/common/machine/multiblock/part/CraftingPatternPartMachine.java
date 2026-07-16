@@ -6,10 +6,8 @@ import com.gregtechceu.gtceu.api.machine.TickableSubscription;
 import com.gregtechceu.gtceu.api.machine.feature.IDataStickInteractable;
 import com.gregtechceu.gtceu.api.machine.mui.MachineUIPanelBuilder;
 import com.gregtechceu.gtceu.api.machine.multiblock.MultiblockControllerMachine;
-import com.gregtechceu.gtceu.api.machine.trait.notifiable.NotifiableFluidTank;
 import com.gregtechceu.gtceu.api.machine.trait.notifiable.NotifiableItemStackHandler;
 import com.gregtechceu.gtceu.api.machine.trait.recipe.RecipeHandlerList;
-import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient;
 import com.gregtechceu.gtceu.api.recipe.ingredient.SizedIngredient;
 import com.gregtechceu.gtceu.api.sync_system.annotations.SaveField;
 import com.gregtechceu.gtceu.api.sync_system.annotations.SyncToClient;
@@ -17,7 +15,6 @@ import com.gregtechceu.gtceu.api.transfer.item.CustomItemStackHandler;
 import com.gregtechceu.gtceu.common.data.machines.GTAEMachines;
 import com.gregtechceu.gtceu.common.item.behavior.IntCircuitBehaviour;
 import com.gregtechceu.gtceu.common.mui.GTGuiTextures;
-import com.gregtechceu.gtceu.common.mui.GTMuiMachineUtil;
 import com.gregtechceu.gtceu.common.mui.widgets.PopupPanel;
 import com.gregtechceu.gtceu.integration.ae2.machine.MEBusPartMachine;
 import com.gregtechceu.gtceu.utils.GTMath;
@@ -33,8 +30,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.common.util.INBTSerializable;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidType;
 
 import appeng.api.crafting.IPatternDetails;
 import appeng.api.crafting.PatternDetailsHelper;
@@ -112,14 +107,6 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
 
     @Getter
     @SaveField
-    protected final NotifiableItemStackHandler shareInventory;
-
-    @Getter
-    @SaveField
-    protected final NotifiableFluidTank shareTank;
-
-    @Getter
-    @SaveField
     protected final InternalSlot[] internalInventory = new InternalSlot[MAX_PATTERN_COUNT];
 
     private final BiMap<IPatternDetails, InternalSlot> detailsSlotMap = HashBiMap.create(MAX_PATTERN_COUNT);
@@ -136,13 +123,13 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
     @Nullable
     protected TickableSubscription updateSubs;
 
-    // 新增字段
     public final Object2LongLinkedOpenHashMap<GenericStack> outputItems = new Object2LongLinkedOpenHashMap<>();
     @Getter
     private final BiMap<IPatternDetails, Integer> patternSlotMap = HashBiMap.create();
 
     public CraftingPatternPartMachine(BlockEntityCreationInfo info) {
         super(info, IO.IN, new NotifiableItemStackHandler(9, IO.IN, IO.NONE));
+        circuitSlot.setEnabled(false);
         patternInventory.setFilter(stack -> stack.getItem() instanceof CraftingPatternItem);
         patternInventory.setOnContentsChanged(() -> syncDataHolder.markClientSyncFieldDirty("patternInventory"));
 
@@ -150,9 +137,6 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
             this.internalInventory[i] = new InternalSlot();
         }
         getMainNode().addService(ICraftingProvider.class, this);
-
-        this.shareInventory = attachTrait(new NotifiableItemStackHandler(9, IO.IN, IO.NONE));
-        this.shareTank = attachTrait(new NotifiableFluidTank(9, 8 * FluidType.BUCKET_VOLUME, IO.IN, IO.NONE));
         this.internalRecipeHandler = new CraftingPatternInternalSlotRecipeHandler(this, internalInventory);
     }
 
@@ -253,64 +237,12 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
                                         .value(SyncHandlers.string(() -> this.customName, this::setCustomName)))
                                 .margin(5)));
 
-        IPanelHandler sharedItemsPanelHandler = syncManager.syncedPanel("shared_items", true,
-                (sm, handler) -> {
-                    SlotGroup sharedItemSlotGroup = new SlotGroup("shared_item_slots", 3, false);
-                    return PopupPanel.createPopupPanel("shared_items_panel", 80, 86)
-                            .child(Text.lang("gui.gtceu.share_inventory.title").asWidget().margin(4))
-                            .child(new Grid()
-                                    .name("shared_item_grid")
-                                    .top(26)
-                                    .height(18 * 3)
-                                    .minElementMargin(0, 0)
-                                    .minColWidth(18).minRowHeight(18)
-                                    .leftRel(0.5f)
-                                    .gridOfSizeWidth(9, 3, (x, y, index) -> new ItemSlot()
-                                            .slot(SyncHandlers.itemSlot(shareInventory, index)
-                                                    .slotGroup(sharedItemSlotGroup)
-                                                    .accessibility(true, true))));
-                });
-
-        IPanelHandler sharedFluidsPanelHandler = syncManager.syncedPanel("shared_fluids", true,
-                (sm, handler) -> PopupPanel.createPopupPanel("shared_fluids_panel", 85, 86)
-                        .child(Text.lang("gui.gtceu.share_tank.title").asWidget().margin(4))
-                        .child(GTMuiMachineUtil.createSlotGroupFromInventory(sm, shareTank,
-                                "shared_fluid_slots", 9, 'F',
-                                GTMuiMachineUtil.createSquareMatrix(9, 'F'))
-                                .top(26)
-                                .leftRel(0.5f)));
-
         BooleanSyncValue canRefundValue = SyncHandlers.bool(this::canRefund, b -> {});
         syncManager.syncValue("can_refund", canRefundValue);
         syncManager.registerServerSyncedAction("refundButtonPressed", packet -> refundAll());
 
         return MachineUIPanelBuilder.panelBuilder(this)
                 .leftConfigurators(f -> f.child(new ButtonWidget<>() // Shared items
-                        .size(18)
-                        .onMousePressed((context, b) -> {
-                            if (b == 0) {
-                                sharedItemsPanelHandler.openPanel();
-                                return true;
-                            }
-                            return false;
-                        })
-                        .overlay(GTGuiTextures.BUTTON_ITEM_OUTPUT)
-                        .tooltip(new RichTooltip()
-                                .addLine(Text.lang("gui.gtceu.share_inventory.desc.0"))
-                                .addLine(Text.lang("gui.gtceu.share_inventory.desc.1"))))
-                        .child(new ButtonWidget<>() // Shared fluids
-                                .size(18)
-                                .onMousePressed((context, b) -> {
-                                    if (b == 0) {
-                                        sharedFluidsPanelHandler.openPanel();
-                                        return true;
-                                    }
-                                    return false;
-                                })
-                                .overlay(GTGuiTextures.BUTTON_FLUID_OUTPUT)
-                                .tooltip(new RichTooltip()
-                                        .addLine(Text.lang("gui.gtceu.share_tank.desc.0"))
-                                        .addLine(Text.lang("gui.gtceu.share_inventory.desc.1"))))
                         .child(new ButtonWidget<>() // Refund
                                 .size(18)
                                 .onMousePressed((context, b) -> {
@@ -332,7 +264,7 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
                                     return false;
                                 })
                                 .overlay(Text.str("✎").asIcon().size(16))
-                                .tooltip(new RichTooltip().addLine(Text.lang("gui.gtceu.rename.desc")))));
+                                .tooltip(new RichTooltip().addLine(Text.lang("gui.gtceu.rename.desc"))))));
     }
 
     @Override
@@ -418,7 +350,7 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
             var illegal = input.keySet().stream()
                     .map(AEKey::getType)
                     .map(AEKeyType::getId)
-                    .anyMatch(id -> !id.equals(AEKeyType.items().getId()) && !id.equals(AEKeyType.fluids().getId()));
+                    .anyMatch(id -> !id.equals(AEKeyType.items().getId()));
             if (illegal) return false;
         }
         return true;
@@ -474,7 +406,6 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
     @Override
     public void onMachineDestroyed() {
         patternInventory.dropInventoryInWorld(getLevel(), getBlockPos());
-        shareInventory.dropInventoryInWorld();
     }
 
     @Override
@@ -492,25 +423,18 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
         private Runnable onContentsChanged = () -> {};
         private final Object2LongOpenCustomHashMap<ItemStack> itemInventory = new Object2LongOpenCustomHashMap<>(
                 ItemStackHashStrategy.comparingAllButCount());
-        private final Object2LongOpenHashMap<FluidStack> fluidInventory = new Object2LongOpenHashMap<>();
         private List<ItemStack> itemStacks = null;
-        private List<FluidStack> fluidStacks = null;
 
         public boolean isItemEmpty() {
             return itemInventory.isEmpty();
         }
 
-        public boolean isFluidEmpty() {
-            return fluidInventory.isEmpty();
-        }
-
         public boolean isEmpty() {
-            return isItemEmpty() && isFluidEmpty();
+            return isItemEmpty();
         }
 
         public void onContentsChanged() {
             itemStacks = null;
-            fluidStacks = null;
             onContentsChanged.run();
         }
 
@@ -519,9 +443,6 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
             if (what instanceof AEItemKey itemKey) {
                 var stack = itemKey.toStack();
                 itemInventory.addTo(stack, amount);
-            } else if (what instanceof AEFluidKey fluidKey) {
-                var stack = fluidKey.toStack(1);
-                fluidInventory.addTo(stack, amount);
             }
         }
 
@@ -533,16 +454,6 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
                         .forEach(itemStacks::addAll);
             }
             return itemStacks;
-        }
-
-        public List<FluidStack> getFluids() {
-            if (fluidStacks == null) {
-                fluidStacks = new ArrayList<>();
-                fluidInventory.object2LongEntrySet().stream()
-                        .map(e -> GTMath.splitFluidStacks(e.getKey(), e.getLongValue()))
-                        .forEach(fluidStacks::addAll);
-            }
-            return fluidStacks;
         }
 
         public void refund() {
@@ -567,23 +478,6 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
                     count -= inserted;
                     if (count == 0) it.remove();
                     else entry.setValue(count);
-                }
-            }
-            for (var it = fluidInventory.object2LongEntrySet().iterator(); it.hasNext();) {
-                var entry = it.next();
-                var stack = entry.getKey();
-                var amount = entry.getLongValue();
-                if (stack.isEmpty() || amount == 0) {
-                    it.remove();
-                    continue;
-                }
-                var key = AEFluidKey.of(stack);
-                if (key == null) continue;
-                long inserted = StorageHelper.poweredInsert(energy, networkInv, key, amount, actionSource);
-                if (inserted > 0) {
-                    amount -= inserted;
-                    if (amount == 0) it.remove();
-                    else entry.setValue(amount);
                 }
             }
             onContentsChanged();
@@ -639,48 +533,6 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
             return left.isEmpty() ? null : left;
         }
 
-        public @Nullable List<FluidIngredient> handleFluidInternal(List<FluidIngredient> left, boolean simulate) {
-            boolean changed = false;
-            for (var it = left.listIterator(); it.hasNext();) {
-                var ingredient = it.next();
-                if (ingredient.isEmpty()) {
-                    it.remove();
-                    continue;
-                }
-                var fluids = ingredient.getStacks();
-                if (fluids.length == 0 || fluids[0].isEmpty()) {
-                    it.remove();
-                    continue;
-                }
-                int amount = fluids[0].getAmount();
-                for (var it2 = fluidInventory.object2LongEntrySet().iterator(); it2.hasNext();) {
-                    var entry = it2.next();
-                    var stack = entry.getKey();
-                    var count = entry.getLongValue();
-                    if (stack.isEmpty() || count == 0) {
-                        it2.remove();
-                        continue;
-                    }
-                    if (!ingredient.test(stack)) continue;
-                    int extracted = Math.min(GTMath.saturatedCast(count), amount);
-                    if (!simulate && extracted > 0) {
-                        changed = true;
-                        count -= extracted;
-                        if (count == 0) it2.remove();
-                        else entry.setValue(count);
-                    }
-                    amount -= extracted;
-                    if (amount <= 0) {
-                        it.remove();
-                        break;
-                    }
-                }
-                if (amount > 0) ingredient.setAmount(amount);
-            }
-            if (changed) onContentsChanged();
-            return left.isEmpty() ? null : left;
-        }
-
         @Override
         public CompoundTag serializeNBT() {
             CompoundTag tag = new CompoundTag();
@@ -691,13 +543,6 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
                 itemsTag.add(ct);
             }
             if (!itemsTag.isEmpty()) tag.put("inventory", itemsTag);
-            ListTag fluidsTag = new ListTag();
-            for (var entry : fluidInventory.object2LongEntrySet()) {
-                var ct = entry.getKey().writeToNBT(new CompoundTag());
-                ct.putLong("real", entry.getLongValue());
-                fluidsTag.add(ct);
-            }
-            if (!fluidsTag.isEmpty()) tag.put("fluidInventory", fluidsTag);
             return tag;
         }
 
@@ -709,13 +554,6 @@ public class CraftingPatternPartMachine extends MEBusPartMachine
                 var stack = ItemStack.of(ct);
                 var count = ct.getLong("real");
                 if (!stack.isEmpty() && count > 0) itemInventory.put(stack, count);
-            }
-            ListTag fluids = tag.getList("fluidInventory", Tag.TAG_COMPOUND);
-            for (Tag t : fluids) {
-                if (!(t instanceof CompoundTag ct)) continue;
-                var stack = FluidStack.loadFluidStackFromNBT(ct);
-                var amount = ct.getLong("real");
-                if (!stack.isEmpty() && amount > 0) fluidInventory.put(stack, amount);
             }
         }
     }

@@ -1,9 +1,6 @@
 package top.ialdaiaxiariyay.bettergtae;
 
 import com.gregtechceu.gtceu.GTCEu;
-import top.ialdaiaxiariyay.bettergtae.client.ClientProxy;
-import top.ialdaiaxiariyay.bettergtae.common.CommonProxy;
-import top.ialdaiaxiariyay.bettergtae.data.StorageManager;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.common.MinecraftForge;
@@ -13,6 +10,9 @@ import net.minecraftforge.fml.common.Mod;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import top.ialdaiaxiariyay.bettergtae.client.ClientProxy;
+import top.ialdaiaxiariyay.bettergtae.common.CommonProxy;
+import top.ialdaiaxiariyay.bettergtae.data.StorageManager;
 
 import java.util.Objects;
 
@@ -42,7 +42,7 @@ public class BetterGTAE {
         }
     }
 
-    public static boolean IsLoadMixin(){
+    public static boolean IsLoadMixin() {
         return GTCEu.isModLoaded("mae2") || GTCEu.isModLoaded("extendedae_plus") || GTCEu.isModLoaded("bigger_ae2");
     }
 }

@@ -160,7 +160,7 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
         super(info, IO.IN, new NotifiableItemStackHandler(9, IO.IN, IO.NONE));
         patternInventory.setOnContentsChanged(() -> getSyncDataHolder().markClientSyncFieldDirty("patternInventory"));
         this.patternInventory.setFilter(stack -> stack.getItem() instanceof ProcessingPatternItem);
-
+        circuitSlot.setEnabled(false);
         for (int i = 0; i < this.internalInventory.length; i++) {
             NotifiableItemStackHandler circuitInv = attachTrait(
                     new NotifiableItemStackHandler(1, IO.IN, IO.NONE) {
@@ -177,8 +177,8 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
         }
 
         getMainNode().addService(ICraftingProvider.class, this);
-        this.shareInventory = attachTrait(new NotifiableItemStackHandler(16, IO.IN, IO.NONE));
-        this.shareTank = attachTrait(new NotifiableFluidTank(16, 8 * FluidType.BUCKET_VOLUME, IO.IN, IO.NONE));
+        this.shareInventory = attachTrait(new NotifiableItemStackHandler(16, IO.IN, IO.BOTH));
+        this.shareTank = attachTrait(new NotifiableFluidTank(16, 8 * FluidType.BUCKET_VOLUME, IO.IN, IO.BOTH));
         this.internalRecipeHandler = new ExtendInternalSlotRecipeHandler(this, internalInventory);
         Arrays.fill(circuitConfigurations, -1);
     }
@@ -195,7 +195,6 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
                 }
             }
             needPatternSync = true;
-            // 将电路配置同步到 InternalSlot 的 circuitInventory
             for (int i = 0; i < circuitConfigurations.length; i++) {
                 setCircuitConfiguration(i, circuitConfigurations[i]);
             }
@@ -322,10 +321,8 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
 
     @Override
     public MachineUIPanelBuilder getPanelBuilder(PosGuiData data, PanelSyncManager syncManager, UISettings settings) {
-        // 保留主面板同步管理器引用，供后续闭包使用
         final PanelSyncManager mainSyncManager = syncManager;
 
-        // ---- 重命名面板 ----
         IPanelHandler renamingPanelHandler = syncManager.syncedPanel("renaming", true,
                 ((syncManager1, syncHandler) -> PopupPanel.createPopupPanel("renaming_panel", 110, 40)
                         .child(Flow.col()
@@ -336,37 +333,36 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
                                         .value(SyncHandlers.string(() -> this.customName, this::setCustomName)))
                                 .margin(5))));
 
-        // ---- 共享物品面板 ----
         IPanelHandler sharedItemsPanelHandler = syncManager.syncedPanel("shared_items", true,
-                (syncManager1, panelHandler) -> {
-                    SlotGroup sharedItemSlotGroup = new SlotGroup("shared_item_slots", 4, false);
-                    // 窗口宽度略大于 4 个 18px 格子（72）+ 边距，80 足够
-                    return PopupPanel.createPopupPanel("shared_items_panel", 80, 86)
-                            .child(Text.lang("gui.gtceu.share_inventory.title").asWidget().margin(4))
-                            .child(new Grid()
-                                    .name("shared_item_grid")
-                                    .top(26)
-                                    .height(18 * 4)                // 4 行
-                                    .minElementMargin(0, 0)
-                                    .minColWidth(18).minRowHeight(18)
-                                    .leftRel(0.5f)
-                                    .gridOfSizeWidth(16, 4, (x, y, index) -> new ItemSlot()   // 总共 16 格，4 列
-                                            .slot(SyncHandlers.itemSlot(shareInventory, index)
-                                                    .slotGroup(sharedItemSlotGroup)
-                                                    .accessibility(true, true))));
-                });
-        // ---- 共享流体面板 ----
-        IPanelHandler sharedFluidsPanelHandler = syncManager.syncedPanel("shared_fluids", true,
-                (syncManager1, panelHandler) -> PopupPanel.createPopupPanel("shared_fluids_panel", 85, 86)
-                        .child(Text.lang("gui.gtceu.share_tank.title").asWidget().margin(4))
-                        .child(GTMuiMachineUtil.createSlotGroupFromInventory(syncManager1, shareTank,
-                                "shared_fluid_slots", 16, 'F',
-                                GTMuiMachineUtil.createSquareMatrix(16, 'F'))   // 4x4 矩阵，共 16 格
-                                .top(26)
-                                .leftRel(0.5f)));
+                (syncManager1, panelHandler) -> PopupPanel.createPopupPanel("shared_items_panel", 80, 100)
+                        .background(GTGuiTextures.BACKGROUND_POPUP)
+                        .child(Text.lang("gui.gtceu.share_inventory.title").asWidget().margin(4))
+                        .child(
+                                GTMuiMachineUtil.createSlotGroupFromInventory(
+                                        shareInventory,
+                                        "shared_item_slots",
+                                        16,
+                                        'I',
+                                        syncManager1,
+                                        GTMuiMachineUtil.createSquareMatrix(16, 'I'))
+                                        .top(22)
+                                        .leftRel(0.5f)));
 
-        // ---- 电路配置数值选择器面板（右键弹出） ----
-        // 用 IntSyncValue 存储当前正在编辑的槽位号
+        IPanelHandler sharedFluidsPanelHandler = syncManager.syncedPanel("shared_fluids", true,
+                (syncManager1, panelHandler) -> PopupPanel.createPopupPanel("shared_fluids_panel", 85, 100)
+                        .background(GTGuiTextures.BACKGROUND_POPUP)
+                        .child(Text.lang("gui.gtceu.share_tank.title").asWidget().margin(4))
+                        .child(
+                                GTMuiMachineUtil.createSlotGroupFromInventory(
+                                        syncManager1,
+                                        shareTank,
+                                        "shared_fluid_slots",
+                                        16,
+                                        'F',
+                                        GTMuiMachineUtil.createSquareMatrix(16, 'F'))
+                                        .top(22)
+                                        .leftRel(0.5f)));
+
         final AtomicInteger selectedCircuitSlot = new AtomicInteger(-1);
 
         final IPanelHandler circuitPickerHandler = mainSyncManager.syncedPanel("circuit_picker", true,
@@ -385,7 +381,6 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
                             getCircuitConfiguration(slotIndex)))
                             .asWidget().posRel(0.5f, 0.12f).size(160, 12));
 
-                    // 数字网格（0~32）
                     Grid grid = new Grid()
                             .minElementMargin(0, 0)
                             .minColWidth(18).minRowHeight(18)
@@ -412,7 +407,6 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
 
                     popup.child(grid);
 
-                    // 清除按钮
                     ButtonWidget<?> clearBtn = new ButtonWidget<>()
                             .size(40, 16)
                             .posRel(0.5f, 0.85f)
@@ -432,7 +426,6 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
                     return popup;
                 });
 
-        // ---- 电路配置总览面板（左侧按钮打开） ----
         IPanelHandler circuitPanelHandler = syncManager.syncedPanel("circuit_config", true,
                 (syncManager1, panelHandler) -> {
                     PopupPanel popup = PopupPanel.createPopupPanel("circuit_config_panel", 174, 185);
@@ -455,19 +448,16 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
                     return popup;
                 });
 
-        // ---- 退款 / 状态等同步值 ----
         BooleanSyncValue canRefundValue = SyncHandlers.bool(this::canRefund, b -> {});
         syncManager.syncValue("can_refund", canRefundValue);
 
-        // ---- 注册动作 ----
         syncManager.registerServerSyncedAction("refundButtonPressed", packet -> refundAll());
         syncManager.registerServerSyncedAction("setCircuitConfig", packet -> {
             int slot = packet.readVarInt();
             int value = packet.readVarInt();
-            setCircuitConfiguration(slot, value); // 内部会同步更新 circuitInventory
+            setCircuitConfiguration(slot, value);
         });
 
-        // ---- 左侧配置按钮区域 ----
         return MachineUIPanelBuilder.panelBuilder(this).leftConfigurators(f -> f
                 .child(new ButtonWidget<>()
                         .size(18)
@@ -548,7 +538,6 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
                 Component.translatable("gtceu.gui.me_network.online") :
                 Component.translatable("gtceu.gui.me_network.offline"))
                 .asWidget().marginTop(2).marginBottom(4));
-
         flow.child(new Grid()
                 .height(18 * (MAX_PATTERN_COUNT / 9))
                 .minElementMargin(0, 0)
@@ -573,9 +562,6 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
             return Text.str(text).asIcon().size(16);
         });
 
-        // 左键
-        // 中键
-        // 右键：打开数值选择器
         return new ButtonWidget<>()
                 .size(18, 18)
                 .background(GTGuiTextures.SLOT)
@@ -583,7 +569,7 @@ public class ExtendMEPatternBufferPartMachine extends MEBusPartMachine
                 .onMousePressed((context, btn) -> {
                     int cur = getCircuitConfiguration(slotIndex);
                     int newVal;
-                    if (btn == 0) { // 左键
+                    if (btn == 0) {
                         if (cur == -1) newVal = 0;
                         else {
                             newVal = (cur + 1) % 33;
